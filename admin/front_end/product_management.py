@@ -7,6 +7,8 @@ from PyQt6 import *
 
 from add_item import AddItem
 
+from salesdb import SalesDBFunctions
+
 class ProductManagement(QWidget):
     def __init__(self):
         super().__init__()
