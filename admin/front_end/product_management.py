@@ -93,10 +93,6 @@ class ProductManagement(QWidget):
         self.add_item_dialogue.exec()
 
     def show_edit_item(self):
-        # self.edit_item_dialogue = EditItem()
-        # self.edit_item_dialogue.data_saved.connect(self.show_item_list)
-        # self.edit_item_dialogue.exec()
-
         pass
 
     def update_table_content(self):

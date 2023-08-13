@@ -39,12 +39,12 @@ class AddItem(QDialog):
         self.sales_group.addItem('Retail')
         self.sales_group.addItem('Wholesale')
 
-        self.item_cost = QLineEdit()
-        self.item_cost.setPlaceholderText('Cost')
-        self.item_discount = QLineEdit()
-        self.item_discount.setPlaceholderText('Discount')
-        self.item_sell_price = QLineEdit()
-        self.item_sell_price.setPlaceholderText('Sell price')
+        self.cost = QLineEdit()
+        self.cost.setPlaceholderText('Cost')
+        self.discount = QLineEdit()
+        self.discount.setPlaceholderText('Discount')
+        self.sell_price = QLineEdit()
+        self.sell_price.setPlaceholderText('Sell price')
 
 
         # validity
@@ -71,7 +71,7 @@ class AddItem(QDialog):
         self.save_item_push_button = QPushButton('SAVE ITEM')
         self.save_item_push_button.clicked.connect(lambda: self.store_data(
             self.item_name, self.barcode, self.item_type, self.brand, self.supplier,
-            self.sales_group, self.item_cost, self.item_discount, self.item_sell_price, self.expiry_date, self.effective_date))
+            self.sales_group, self.cost, self.discount, self.sell_price, self.expiry_date, self.effective_date))
 
         self.grid_layout.addWidget(self.item_name, 0, 0, 1, 2)
         self.grid_layout.addWidget(self.barcode, 1, 0, 1, 2)
@@ -80,9 +80,9 @@ class AddItem(QDialog):
         self.grid_layout.addWidget(self.supplier, 4, 0, 1, 2)
         self.grid_layout.addWidget(self.sales_group, 5, 0, 1, 2)
 
-        self.grid_layout.addWidget(self.item_cost, 6, 0, 1, 2)
-        self.grid_layout.addWidget(self.item_discount, 7, 0, 1, 2)
-        self.grid_layout.addWidget(self.item_sell_price, 8, 0, 1, 2)
+        self.grid_layout.addWidget(self.cost, 6, 0, 1, 2)
+        self.grid_layout.addWidget(self.discount, 7, 0, 1, 2)
+        self.grid_layout.addWidget(self.sell_price, 8, 0, 1, 2)
 
         self.grid_layout.addWidget(self.expiry_date, 9, 0, 1, 2)
         self.grid_layout.addWidget(self.effective_date, 10, 0, 1, 2)
@@ -103,7 +103,7 @@ class AddItem(QDialog):
             self.on_hand.setEnabled(True)
             self.available.setEnabled(True)
 
-    def store_data(self, item_name, barcode, item_type, brand, supplier, sales_group, item_cost, item_discount, item_sell_price, expiry_date, effective_date):
+    def store_data(self, item_name, barcode, item_type, brand, supplier, sales_group, cost, discount, sell_price, expiry_date, effective_date):
         self.salesdb_functions = SalesDBFunctions()
 
         item_name = self.item_name.text()
@@ -114,14 +114,14 @@ class AddItem(QDialog):
         sales_group = self.sales_group.currentText()
 
         # Extract the input first
-        item_cost_text = self.item_cost.text()
-        item_discount_text = self.item_discount.text()
-        item_sell_price_text = self.item_sell_price.text()
+        cost_text = self.cost.text()
+        discount_text = self.discount.text()
+        sell_price_text = self.sell_price.text()
 
         # Convert the input to float or default to 0.00 if the input is empty
-        item_cost = float(item_cost_text) if item_cost_text else 0.00
-        item_discount = float(item_discount_text) if item_discount_text else 0.00
-        item_sell_price = float(item_sell_price_text) if item_sell_price_text else 0.00
+        cost = float(cost_text) if cost_text else 0.00
+        discount = float(discount_text) if discount_text else 0.00
+        sell_price = float(sell_price_text) if sell_price_text else 0.00
         
 
         expiry_date = self.expiry_date.date().toString(Qt.DateFormat.ISODate)
@@ -132,7 +132,7 @@ class AddItem(QDialog):
         self.salesdb_functions.insert_item_brand_table(brand)
         self.salesdb_functions.insert_supplier_table(supplier)
         self.salesdb_functions.insert_sales_group_table(sales_group)
-        self.salesdb_functions.insert_item_price_table(item_cost, item_discount, item_sell_price, effective_date)
+        self.salesdb_functions.insert_item_price_table(cost, discount, sell_price, effective_date)
 
         # Emit the signal after data is saved
         self.data_saved.emit()

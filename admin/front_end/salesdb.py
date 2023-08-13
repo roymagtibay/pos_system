@@ -213,33 +213,27 @@ class SalesDBFunctions():
 
     def get_item_id(self, item_name, barcode, expiry_date):
             self.cursor.execute('SELECT ItemId FROM Item WHERE ItemName = ? AND Barcode = ? AND ExpireDt = ?', (item_name, barcode, expiry_date))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+            self.conn.commit()
     
     def get_item_type_id(self, item_type):
             self.cursor.execute('SELECT ItemTypeId FROM ItemType WHERE Name = ?', (item_type,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+            self.conn.commit()
     
     def get_brand_id(self, brand):
             self.cursor.execute('SELECT BrandId FROM Brand WHERE Name = ?', (brand,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+            self.conn.commit()
 
     def get_supplier_id(self, supplier):
             self.cursor.execute('SELECT SupplierId FROM Supplier WHERE Name = ?', (supplier,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+            self.conn.commit()
 
     def get_sales_group_id(self, sales_group):
             self.cursor.execute('SELECT SaleGrpId FROM SalesGroup WHERE Name = ?', (sales_group,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+            self.conn.commit()
     
     def get_item_price_id(self, cost, discount, sell_price, effective_date):
             self.cursor.execute('SELECT ItemPriceId FROM ItemPrice WHERE Cost = ? AND Discount = ? AND SellPrice = ? AND EffectiveDt = ?', ( cost, discount, sell_price, effective_date))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+            self.conn.commit()
 # Promo ---------------------------------------------------------------------------------------------------  (runs every Nth day of the month on ItemPrice ,  If near expiring Item(ExpireDt) - Today < N days then update ItemPrice(PromoId))
     def create_promo_table(self, promo):
 

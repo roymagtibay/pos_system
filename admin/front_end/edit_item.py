@@ -46,7 +46,6 @@ class EditItem(QDialog):
         self.item_sell_price = QLineEdit()
         self.item_sell_price.setPlaceholderText('Sell price')
 
-
         # validity
         self.expiry_date = QDateEdit()
         self.expiry_date.setCalendarPopup(True)
@@ -73,6 +72,7 @@ class EditItem(QDialog):
             self.item_name, self.barcode, self.item_type, self.brand, self.supplier,
             self.sales_group, self.item_cost, self.item_discount, self.item_sell_price, self.expiry_date, self.effective_date))
 
+        # Widgets layout
         self.grid_layout.addWidget(self.item_name, 0, 0, 1, 2)
         self.grid_layout.addWidget(self.barcode, 1, 0, 1, 2)
         self.grid_layout.addWidget(self.item_type, 2, 0, 1, 2)
@@ -103,9 +103,11 @@ class EditItem(QDialog):
             self.on_hand.setEnabled(True)
             self.available.setEnabled(True)
 
-    def store_data(self, item_name, barcode, item_type, brand, supplier, sales_group, item_cost, item_discount, item_sell_price, expiry_date, effective_date):
-        self.salesdb_functions = SalesDBFunctions()
+    def store_data(self):
+        # item_name, barcode, item_type, brand, supplier, sales_group, item_cost, item_discount, item_sell_price, expiry_date, effective_date:
+        
 
+        # primary information
         item_name = self.item_name.text()
         barcode = self.barcode.text()
         item_type = self.item_type.currentText()
@@ -113,26 +115,42 @@ class EditItem(QDialog):
         supplier = self.supplier.currentText()
         sales_group = self.sales_group.currentText()
 
-        # def init_item_price_table(self, cost, discount, sell_price, effective_date):
-        item_cost = float(self.item_cost.text())
-        item_discount = float(self.item_discount.text())
-        item_sell_price = float(self.item_sell_price.text())
-        
+        # Extract the input first
+        cost_text = self.cost.text()
+        discount_text = self.discount.text()
+        sell_price_text = self.sell_price.text()
 
+        # Convert the input to float or default to 0.00 if the input is empty
+        cost = float(cost_text) if cost_text else 0.00
+        discount = float(discount_text) if discount_text else 0.00
+        sell_price = float(sell_price_text) if sell_price_text else 0.00
+    
         expiry_date = self.expiry_date.date().toString(Qt.DateFormat.ISODate)
         effective_date = self.effective_date.date().toString(Qt.DateFormat.ISODate)
- 
+
+        self.salesdb_functions = SalesDBFunctions()
+
+        # get ids
+        item_id = self.salesdb_functions.get_item_id(item_name, barcode, expiry_date)
+        item_type_id = self.salesdb_functions.get_item_type_id(item_type)
+        brand_id = self.salesdb_functions.get_brand_id(brand)
+        supplier_id = self.salesdb_functions.get_supplier_id(supplier)
+        sales_group_id = self.salesdb_functions.get_sales_group_id(sales_group)
+        item_price_id = self.salesdb_functions.get_item_price_id(cost, discount, sell_price, effective_date)
+
+        # update primary information
         self.salesdb_functions.insert_item_table(item_name, barcode, expiry_date)
         self.salesdb_functions.insert_item_type_table(item_type)
         self.salesdb_functions.insert_item_brand_table(brand)
         self.salesdb_functions.insert_supplier_table(supplier)
         self.salesdb_functions.insert_sales_group_table(sales_group)
-        self.salesdb_functions.insert_item_price_table(item_cost, item_discount, item_sell_price, effective_date)
+        self.salesdb_functions.insert_item_price_table(cost, discount, sell_price, effective_date)
 
         # Emit the signal after data is saved
         self.data_saved.emit()
 
         self.accept()
+        
         
 
 
