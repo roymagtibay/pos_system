@@ -8,11 +8,16 @@ class SalesDBFunctions():
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
 
+
 # Item ---------------------------------------------------------------------------------------------------
     def create_item_table(self):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS Item;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Item (
+        CREATE TABLE Item (
             ItemId INTEGER PRIMARY KEY AUTOINCREMENT,
             ItemName TEXT,
             Barcode TEXT,
@@ -35,23 +40,23 @@ class SalesDBFunctions():
         ''', (item_name, barcode, expiry_date))
         self.conn.commit()
 
-    def update_item_table(self, item_name, barcode, expiry_date, item_id):
+    def select_item_table(self, item_name, barcode, expiry_date):
         self.cursor.execute('''
-        UPDATE Item
-        SET
-            ItemName = ?,
-            Barcode = ?,
-            ExpireDt = ?
-        WHERE
-            ItemId = ?
-        ''', (item_name, barcode, expiry_date, item_id))
-        self.conn.commit()
+        SELECT ItemName, Barcode, ExpireDt FROM Item
+        WHERE ItemName = ? AND Barcode = ? AND ExpireDt = ?
+        ''', (item_name, barcode, expiry_date))
 
+        return self.cursor.fetchall()
+    
 # ItemType ---------------------------------------------------------------------------------------------------
     def create_item_type_table(self):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS ItemType;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ItemType (
+        CREATE TABLE ItemType (
             ItemTypeId INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT,
             PromoId INTEGER DEFAULT 0,
@@ -68,22 +73,23 @@ class SalesDBFunctions():
         ''', (item_type,))
         self.conn.commit()
 
-    def update_item_type_table(self, item_type, item_type_id):
+    def select_item_type_table(self, item_type):
         self.cursor.execute('''
-        UPDATE ItemType
-        SET
-            Name = ?
-        WHERE
-            ItemTypeId = ?
-        ''', (item_type, item_type_id))
-        self.conn.commit()
-
-
+        SELECT Name FROM ItemType
+        WHERE Name = ?
+        ''', (item_type,))
+        
+        return self.cursor.fetchall()
+    
 # Brand ---------------------------------------------------------------------------------------------------
     def create_item_brand_table(self):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS Brand;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Brand (
+        CREATE TABLE Brand (
             BrandId INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT,
             PromoId INTEGER DEFAULT 0,
@@ -100,22 +106,23 @@ class SalesDBFunctions():
         ''', (brand,))
         self.conn.commit()   
 
-    def update_item_brand_table(self, brand, brand_id):
+    def select_item_brand_table(self, brand):
         self.cursor.execute('''
-        UPDATE Brand
-        SET
-            Name = ?
-        WHERE
-            BrandId = ?
-        ''', (brand, brand_id))
-        self.conn.commit()
-
-
+        SELECT Name FROM Brand
+        WHERE Name = ?
+        ''', (brand,))
+        
+        return self.cursor.fetchall()
+    
 # SalesGroup ---------------------------------------------------------------------------------------------------
     def create_sales_group_table(self):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS SalesGroup;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS SalesGroup (
+        CREATE TABLE SalesGroup (
             SaleGrpId INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT,
             UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -129,22 +136,23 @@ class SalesDBFunctions():
         ''', (sales_group,))
         self.conn.commit()
 
-    def update_sales_group_table(self, sales_group, sales_group_id):
+    def select_sales_group_table(self, sales_group):
         self.cursor.execute('''
-        UPDATE SalesGroup
-        SET
-            Name = ?
-        WHERE
-            SaleGrpId = ?
-        ''', (sales_group, sales_group_id))
-        self.conn.commit()
-
-
+        SELECT Name FROM SalesGroup
+        WHERE Name = ?
+        ''')
+        
+        return self.cursor.fetchall()
+    
 # Supplier ---------------------------------------------------------------------------------------------------
     def create_supplier_table(self):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS Supplier;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Supplier (
+        CREATE TABLE Supplier (
             SupplierId INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT,
             UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -157,23 +165,24 @@ class SalesDBFunctions():
         INSERT INTO Supplier (Name)  values (?)
         ''', (supplier,))
         self.conn.commit()
- 
-    def update_supplier_table(self, supplier, supplier_id):
+
+    def select_supplier_table(self, supplier):
         self.cursor.execute('''
-        UPDATE Supplier
-        SET
-            Name = ?
-        WHERE
-            SupplierId = ?
-        ''', (supplier, supplier_id))
-        self.conn.commit()
-
-
+        SELECT Name FROM Supplier
+        WHERE Name = ?
+        ''', (supplier,))
+        
+        return self.cursor.fetchall()
+   
 # ItemPrice --------------------------------------------------------------------------------------------------- 
     def create_item_price_table(self):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS ItemPrice;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ItemPrice (
+        CREATE TABLE ItemPrice (
             ItemPriceId INTEGER PRIMARY KEY AUTOINCREMENT,
             ItemId INTEGER DEFAULT 0,
             EffectiveDt DATETIME,
@@ -194,57 +203,24 @@ class SalesDBFunctions():
         INSERT INTO ItemPrice (Cost, Discount, SellPrice, EffectiveDt)  values (?,?,?,?)
         ''', (cost, discount, sell_price, effective_date))
         self.conn.commit()
-
-    def update_item_price_table(self, cost, discount, sell_price, effective_date, item_price_id):
+   
+    def select_item_price_table(self, cost, discount, sell_price, effective_date):
         self.cursor.execute('''
-        UPDATE ItemPrice
-        SET
-            Cost = ?,
-            Discount = ?,
-            SellPrice = ?,
-            EffectiveDt = ?
-        WHERE
-            ItemPriceId = ?
-        ''', (cost, discount, sell_price, effective_date, item_price_id))
-        self.conn.commit()
-
-
-
-
-    def get_item_id(self, item_name, barcode, expiry_date):
-            self.cursor.execute('SELECT ItemId FROM Item WHERE ItemName = ? AND Barcode = ? AND ExpireDt = ?', (item_name, barcode, expiry_date))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
-    
-    def get_item_type_id(self, item_type):
-            self.cursor.execute('SELECT ItemTypeId FROM ItemType WHERE Name = ?', (item_type,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
-    
-    def get_brand_id(self, brand):
-            self.cursor.execute('SELECT BrandId FROM Brand WHERE Name = ?', (brand,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
-
-    def get_supplier_id(self, supplier):
-            self.cursor.execute('SELECT SupplierId FROM Supplier WHERE Name = ?', (supplier,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
-
-    def get_sales_group_id(self, sales_group):
-            self.cursor.execute('SELECT SaleGrpId FROM SalesGroup WHERE Name = ?', (sales_group,))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
-    
-    def get_item_price_id(self, cost, discount, sell_price, effective_date):
-            self.cursor.execute('SELECT ItemPriceId FROM ItemPrice WHERE Cost = ? AND Discount = ? AND SellPrice = ? AND EffectiveDt = ?', ( cost, discount, sell_price, effective_date))
-            result = self.cursor.fetchone()
-            return result[0] if result else None
+        SELECT Cost, Discount, SellPrice, EffectiveDt FROM ItemPrice              
+        WHERE Cost = ? AND Discount = ? AND SellPrice = ? AND EffectiveDt = ?
+        ''', (cost, discount, sell_price, effective_date))
+        
+        return self.cursor.fetchall()
+   
 # Promo ---------------------------------------------------------------------------------------------------  (runs every Nth day of the month on ItemPrice ,  If near expiring Item(ExpireDt) - Today < N days then update ItemPrice(PromoId))
     def create_promo_table(self, promo):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS Promo;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Promo (
+        CREATE TABLE Promo (
             PromoId INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT,
             PromoTyp TEXT,
@@ -265,9 +241,13 @@ class SalesDBFunctions():
     
 # Customer --------------------------------------------------------------------------------------------------- 
     def create_customer_table(self, customer_name, address, phone, customer_type, status):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS Customer;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Customer (
+        CREATE TABLE Customer (
             CustId INTEGER PRIMARY KEY AUTOINCREMENT,
             CustName TEXT,
             Address TEXT,
@@ -286,9 +266,13 @@ class SalesDBFunctions():
     
 # Stocks --------------------------------------------------------------------------------------------------- 
     def create_stocks_table(self, description, on_hand, available):
+        self.cursor.execute('''
+        DROP TABLE IF EXISTS Stocks;
+        ''')
+        self.conn.commit()
 
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Stocks (
+        CREATE TABLE Stocks (
             StockId INTEGER PRIMARY KEY AUTOINCREMENT,
             SupplierId INTEGER DEFAULT 0,
             ItemId INTEGER DEFAULT 0,
@@ -310,7 +294,11 @@ class SalesDBFunctions():
 # ItemSold --------------------------------------------------------------------------------------------------- 
     def create_item_sold_table(self):
         self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ItemSold (
+        DROP TABLE IF EXISTS ItemSold;
+        ''')
+        self.conn.commit()
+        self.cursor.execute('''
+        CREATE TABLE ItemSold (
             ItemSoldId INTEGER PRIMARY KEY AUTOINCREMENT,
             ItemPriceId INTEGER DEFAULT 0,
             CustId INTEGER DEFAULT 0,
@@ -326,3 +314,25 @@ class SalesDBFunctions():
         );
         ''')
         self.conn.commit()
+
+
+
+    # def create_item_type_table(self, item_type):
+
+    # def create_item_brand_table(self, brand):
+
+    # def create_sales_group_table(self, sales_group):
+
+    # def create_supplier_table(self, supplier):
+
+    # def create_item_table(self, item_name, barcode, expiry_date):
+
+    # def create_promo_table(self, promo):
+
+    # def create_item_price_table(self, cost, discount, sell_price, effective_date):
+
+    # def create_customer_table(self, customer_name, address, phone, customer_type, status):
+
+    # def create_stocks_table(self, description, on_hand, available):
+
+    # def create_item_sold_table(self):

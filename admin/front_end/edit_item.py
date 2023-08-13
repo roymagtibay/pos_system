@@ -7,7 +7,7 @@ from PyQt6 import *
 
 from salesdb import SalesDBFunctions
 
-class AddItem(QDialog):
+class EditItem(QDialog):
     data_saved = pyqtSignal()
 
     def __init__(self):
@@ -113,15 +113,10 @@ class AddItem(QDialog):
         supplier = self.supplier.currentText()
         sales_group = self.sales_group.currentText()
 
-        # Extract the input first
-        item_cost_text = self.item_cost.text()
-        item_discount_text = self.item_discount.text()
-        item_sell_price_text = self.item_sell_price.text()
-
-        # Convert the input to float or default to 0.00 if the input is empty
-        item_cost = float(item_cost_text) if item_cost_text else 0.00
-        item_discount = float(item_discount_text) if item_discount_text else 0.00
-        item_sell_price = float(item_sell_price_text) if item_sell_price_text else 0.00
+        # def init_item_price_table(self, cost, discount, sell_price, effective_date):
+        item_cost = float(self.item_cost.text())
+        item_discount = float(self.item_discount.text())
+        item_sell_price = float(self.item_sell_price.text())
         
 
         expiry_date = self.expiry_date.date().toString(Qt.DateFormat.ISODate)
@@ -143,6 +138,6 @@ class AddItem(QDialog):
 
 if __name__ == ('__main__'):
     pos_app = QApplication(sys.argv)
-    window = AddItem()
+    window = EditItem()
     window.show()
     sys.exit(pos_app.exec())

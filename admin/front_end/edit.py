@@ -7,12 +7,12 @@ from PyQt6 import *
 
 from salesdb import SalesDBFunctions
 
-class AddItem(QDialog):
+class EditItem(QDialog):
     data_saved = pyqtSignal()
 
     def __init__(self):
         super().__init__()
-
+        
         self.create_content()
 
     def create_content(self):
@@ -69,9 +69,7 @@ class AddItem(QDialog):
         self.available.setPlaceholderText('Available')
 
         self.save_item_push_button = QPushButton('SAVE ITEM')
-        self.save_item_push_button.clicked.connect(lambda: self.store_data(
-            self.item_name, self.barcode, self.item_type, self.brand, self.supplier,
-            self.sales_group, self.item_cost, self.item_discount, self.item_sell_price, self.expiry_date, self.effective_date))
+        self.save_item_push_button.clicked.connect(self.store_data)
 
         self.grid_layout.addWidget(self.item_name, 0, 0, 1, 2)
         self.grid_layout.addWidget(self.barcode, 1, 0, 1, 2)
@@ -103,8 +101,8 @@ class AddItem(QDialog):
             self.on_hand.setEnabled(True)
             self.available.setEnabled(True)
 
-    def store_data(self, item_name, barcode, item_type, brand, supplier, sales_group, item_cost, item_discount, item_sell_price, expiry_date, effective_date):
-        self.salesdb_functions = SalesDBFunctions()
+    def store_data(self):
+        print("store_data method called")
 
         item_name = self.item_name.text()
         barcode = self.barcode.text()
@@ -112,37 +110,42 @@ class AddItem(QDialog):
         brand = self.brand.currentText()
         supplier = self.supplier.currentText()
         sales_group = self.sales_group.currentText()
-
-        # Extract the input first
-        item_cost_text = self.item_cost.text()
-        item_discount_text = self.item_discount.text()
-        item_sell_price_text = self.item_sell_price.text()
-
-        # Convert the input to float or default to 0.00 if the input is empty
-        item_cost = float(item_cost_text) if item_cost_text else 0.00
-        item_discount = float(item_discount_text) if item_discount_text else 0.00
-        item_sell_price = float(item_sell_price_text) if item_sell_price_text else 0.00
-        
-
+        item_cost = float(self.item_cost.text()) if self.item_cost.text() else 0.0
+        item_discount = float(self.item_discount.text()) if self.item_discount.text() else 0.0
+        item_sell_price = float(self.item_sell_price.text()) if self.item_sell_price.text() else 0.0
         expiry_date = self.expiry_date.date().toString(Qt.DateFormat.ISODate)
         effective_date = self.effective_date.date().toString(Qt.DateFormat.ISODate)
- 
-        self.salesdb_functions.insert_item_table(item_name, barcode, expiry_date)
-        self.salesdb_functions.insert_item_type_table(item_type)
-        self.salesdb_functions.insert_item_brand_table(brand)
-        self.salesdb_functions.insert_supplier_table(supplier)
-        self.salesdb_functions.insert_sales_group_table(sales_group)
-        self.salesdb_functions.insert_item_price_table(item_cost, item_discount, item_sell_price, effective_date)
+        
+        # You can add the logic to save these values to the database here
+        # Example: Call a function to update the database record using these values
 
-        # Emit the signal after data is saved
+        self.salesdb_functions = SalesDBFunctions()
+
+        # Retrieve the IDs using the SalesDBFunctions methods
+        item_id = self.salesdb_functions.get_item_id(item_name, barcode, expiry_date)
+        item_type_id = self.salesdb_functions.get_item_type_id(item_type)
+        brand_id = self.salesdb_functions.get_brand_id(brand)
+        supplier_id = self.salesdb_functions.get_supplier_id(supplier)
+        sales_group_id = self.salesdb_functions.get_sales_group_id(sales_group)
+        item_price_id = self.salesdb_functions.get_item_price_id(item_cost, item_discount, item_sell_price, effective_date)
+
+        self.salesdb_functions.update_item_table(item_name, barcode, expiry_date, item_id)
+        self.salesdb_functions.update_item_type_table(item_type, item_type_id)
+        self.salesdb_functions.update_item_brand_table(brand, brand_id)
+        self.salesdb_functions.update_supplier_table(supplier, supplier_id)
+        self.salesdb_functions.update_sales_group_table(sales_group, sales_group_id)
+        self.salesdb_functions.update_item_price_table(item_cost, item_discount, item_sell_price, effective_date, item_price_id)
+            
+        # Emit the signal to indicate that the data has been saved
         self.data_saved.emit()
 
+        # Close the dialog
         self.accept()
-        
+
+
+
 
 
 if __name__ == ('__main__'):
     pos_app = QApplication(sys.argv)
-    window = AddItem()
-    window.show()
     sys.exit(pos_app.exec())
