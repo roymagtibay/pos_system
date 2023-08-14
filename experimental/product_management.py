@@ -6,7 +6,7 @@ from PyQt6.QtGui import *
 from PyQt6 import *
 
 from manage_item import AddItem
-from database_manager import SalesCreateQuery
+from database_manager import InitTableQuery
 
 class ProductManagement(QWidget):
     def __init__(self):
@@ -19,18 +19,18 @@ class ProductManagement(QWidget):
 
     def initate_db_table(self):
         # creates table for db
-        self.create_query = SalesCreateQuery()
+        self.init_table = InitTableQuery()
 
-        self.create_query.initiate_item_table()
-        self.create_query.initiate_item_type_table()
-        self.create_query.initiate_brand_table()
-        self.create_query.initiate_sales_group_table()
-        self.create_query.initiate_supplier_table()
-        self.create_query.initiate_item_price_table()
-        self.create_query.initiate_promo_table()
-        # self.create_query.initiate_customer_table()
-        # self.create_query.initiate_stocks_table()
-        # self.create_query.initiate_item_sold_table()
+        self.init_table.initiate_item_table()
+        self.init_table.initiate_item_type_table()
+        self.init_table.initiate_brand_table()
+        self.init_table.initiate_sales_group_table()
+        self.init_table.initiate_supplier_table()
+        self.init_table.initiate_item_price_table()
+        self.init_table.initiate_promo_table()
+        # self.init_table.initiate_customer_table()
+        # self.init_table.initiate_stocks_table()
+        # self.init_table.initiate_item_sold_table()
 
     def show_add_item_window(self):
         self.add_item_window = AddItem()

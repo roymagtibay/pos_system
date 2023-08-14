@@ -2,7 +2,7 @@ import sqlite3 # pre-installed in python (if not, install it using 'pip install 
 import os 
 
 
-class SalesCreateQuery():
+class InitTableQuery():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # creates folder for the db file
@@ -171,7 +171,7 @@ class SalesCreateQuery():
         ''')
         self.conn.commit()
 
-class SalesInsertQuery():
+class AddItemQuery():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # creates folder for the db file
@@ -257,28 +257,6 @@ class SalesInsertQuery():
         ''', (item_id, item_price_id))
         self.conn.commit()
 
-class SalesUpdateQuery():
-    def __init__(self):
-        super().__init__()
-
-        # connects to SQL database named 'SALES.db'
-        self.conn = sqlite3.connect('SALES.db')
-        self.cursor = self.conn.cursor()
-    
-class SalesSelectQuery():
-    def __init__(self, db_file='SALES.db'):
-        super().__init__()
-        # creates folder for the db file
-        self.db_folder_path = 'sales/'
-        self.db_file_path = os.path.join(self.db_folder_path, db_file)
-        os.makedirs(self.db_folder_path, exist_ok=True)
-
-        # connects to SQL database named 'SALES.db'
-        self.conn = sqlite3.connect(database=self.db_file_path)
-        self.cursor = self.conn.cursor()
-    
-    def close(self):
-        self.conn.close()
         
     # retrieve table ids
     def retrieve_item_id(self, name):
