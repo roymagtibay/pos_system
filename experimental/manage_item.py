@@ -9,6 +9,8 @@ from database_manager import SalesInsertQuery
 from database_manager import SalesSelectQuery
 
 class AddItem(QDialog):
+    data_stored = pyqtSignal()
+    
     def __init__(self):
         super().__init__()
 
@@ -111,6 +113,13 @@ class AddItem(QDialog):
 
         self.insert_query.close()
 
+<<<<<<< Updated upstream
+=======
+        self.data_stored.emit()
+
+        self.add_item_query.close()
+
+>>>>>>> Stashed changes
         self.accept()
 
 

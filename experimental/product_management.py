@@ -6,7 +6,12 @@ from PyQt6.QtGui import *
 from PyQt6 import *
 
 from manage_item import AddItem
+<<<<<<< Updated upstream
 from database_manager import SalesCreateQuery
+=======
+from database_manager import InitTableQuery
+from database_manager import ListItemQuery
+>>>>>>> Stashed changes
 
 class ProductManagement(QWidget):
     def __init__(self):
@@ -32,21 +37,25 @@ class ProductManagement(QWidget):
         # self.create_query.initiate_stocks_table()
         # self.create_query.initiate_item_sold_table()
 
-    def show_add_item_window(self):
+        self.init_table.close()
+
+    def open_add_item_window(self):
         self.add_item_window = AddItem()
         self.add_item_window.exec()
 
 
+    def show_item_list_table(self):
+        self.list_item = ListItemQuery()
+
     def create_body(self):
         self.layout = QGridLayout()
 
-        
-
-
         self.add_item_button = QPushButton('ADD ITEM')
-        self.add_item_button.clicked.connect(self.show_add_item_window)
+        self.add_item_button.clicked.connect(self.open_add_item_window)
 
         self.item_list_table = QTableWidget()
+        self.item_list_table.setColumnCount(10)
+        self.item_list_table.setHorizontalHeaderLabels(['Item name','Barcode','Item type','Brand','Supplier','Sales group','Cost','Discount','Sell price','Expire date'])
 
         self.layout.addWidget(self.add_item_button)
         self.layout.addWidget(self.item_list_table)
