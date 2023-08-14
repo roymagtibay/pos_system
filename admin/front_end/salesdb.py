@@ -29,11 +29,15 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
     def insert_item_table(self, item_name, barcode, expiry_date):
         self.cursor.execute('''
         INSERT INTO Item (ItemName, Barcode, ExpireDt)  values (?,?,?)
         ''', (item_name, barcode, expiry_date))
         self.conn.commit()
+
+        self.conn.close()
 
     def update_item_table(self, item_name, barcode, expiry_date, item_id):
         self.cursor.execute('''
@@ -46,6 +50,8 @@ class SalesDBFunctions():
             ItemId = ?
         ''', (item_name, barcode, expiry_date, item_id))
         self.conn.commit()
+
+        self.conn.close()
 
 # ItemType ---------------------------------------------------------------------------------------------------
     def create_item_type_table(self):
@@ -61,12 +67,16 @@ class SalesDBFunctions():
         );
         ''')
         self.conn.commit()
+
+        self.conn.close()
         
     def insert_item_type_table(self, item_type):
         self.cursor.execute('''
         INSERT INTO ItemType (Name)  values (?)
         ''', (item_type,))
         self.conn.commit()
+
+        self.conn.close()
 
     def update_item_type_table(self, item_type, item_type_id):
         self.cursor.execute('''
@@ -77,6 +87,8 @@ class SalesDBFunctions():
             ItemTypeId = ?
         ''', (item_type, item_type_id))
         self.conn.commit()
+
+        self.conn.close()
 
 
 # Brand ---------------------------------------------------------------------------------------------------
@@ -94,11 +106,15 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
     def insert_item_brand_table(self, brand):
         self.cursor.execute('''
         INSERT INTO Brand (Name)  values (?)
         ''', (brand,))
-        self.conn.commit()   
+        self.conn.commit()
+
+        self.conn.close()   
 
     def update_item_brand_table(self, brand, brand_id):
         self.cursor.execute('''
@@ -109,6 +125,8 @@ class SalesDBFunctions():
             BrandId = ?
         ''', (brand, brand_id))
         self.conn.commit()
+
+        self.conn.close()
 
 
 # SalesGroup ---------------------------------------------------------------------------------------------------
@@ -123,11 +141,15 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
     def insert_sales_group_table(self, sales_group):
         self.cursor.execute('''
         INSERT INTO SalesGroup (Name)  values (?)
         ''', (sales_group,))
         self.conn.commit()
+
+        self.conn.close()
 
     def update_sales_group_table(self, sales_group, sales_group_id):
         self.cursor.execute('''
@@ -138,6 +160,8 @@ class SalesDBFunctions():
             SaleGrpId = ?
         ''', (sales_group, sales_group_id))
         self.conn.commit()
+
+        self.conn.close()
 
 
 # Supplier ---------------------------------------------------------------------------------------------------
@@ -152,11 +176,15 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
     def insert_supplier_table(self, supplier):
         self.cursor.execute('''
         INSERT INTO Supplier (Name)  values (?)
         ''', (supplier,))
         self.conn.commit()
+
+        self.conn.close()
  
     def update_supplier_table(self, supplier, supplier_id):
         self.cursor.execute('''
@@ -167,6 +195,8 @@ class SalesDBFunctions():
             SupplierId = ?
         ''', (supplier, supplier_id))
         self.conn.commit()
+
+        self.conn.close()
 
 
 # ItemPrice --------------------------------------------------------------------------------------------------- 
@@ -189,11 +219,15 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
     def insert_item_price_table(self, cost, discount, sell_price, effective_date):
         self.cursor.execute('''
         INSERT INTO ItemPrice (Cost, Discount, SellPrice, EffectiveDt)  values (?,?,?,?)
         ''', (cost, discount, sell_price, effective_date))
         self.conn.commit()
+
+        self.conn.close()
 
     def update_item_price_table(self, cost, discount, sell_price, effective_date, item_price_id):
         self.cursor.execute('''
@@ -208,32 +242,46 @@ class SalesDBFunctions():
         ''', (cost, discount, sell_price, effective_date, item_price_id))
         self.conn.commit()
 
+        self.conn.close()
+
 
 
 
     def get_item_id(self, item_name, barcode, expiry_date):
             self.cursor.execute('SELECT ItemId FROM Item WHERE ItemName = ? AND Barcode = ? AND ExpireDt = ?', (item_name, barcode, expiry_date))
             self.conn.commit()
+
+            self.conn.close()
     
     def get_item_type_id(self, item_type):
             self.cursor.execute('SELECT ItemTypeId FROM ItemType WHERE Name = ?', (item_type,))
             self.conn.commit()
+
+            self.conn.close()
     
     def get_brand_id(self, brand):
             self.cursor.execute('SELECT BrandId FROM Brand WHERE Name = ?', (brand,))
             self.conn.commit()
 
+            self.conn.close()
+
     def get_supplier_id(self, supplier):
             self.cursor.execute('SELECT SupplierId FROM Supplier WHERE Name = ?', (supplier,))
             self.conn.commit()
 
+            self.conn.close()
+
     def get_sales_group_id(self, sales_group):
             self.cursor.execute('SELECT SaleGrpId FROM SalesGroup WHERE Name = ?', (sales_group,))
             self.conn.commit()
+
+            self.conn.close()
     
     def get_item_price_id(self, cost, discount, sell_price, effective_date):
             self.cursor.execute('SELECT ItemPriceId FROM ItemPrice WHERE Cost = ? AND Discount = ? AND SellPrice = ? AND EffectiveDt = ?', ( cost, discount, sell_price, effective_date))
             self.conn.commit()
+
+            self.conn.close()
 # Promo ---------------------------------------------------------------------------------------------------  (runs every Nth day of the month on ItemPrice ,  If near expiring Item(ExpireDt) - Today < N days then update ItemPrice(PromoId))
     def create_promo_table(self, promo):
 
@@ -252,10 +300,14 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
         self.cursor.execute('''
         INSERT INTO Promo (Name)  values (?)
         ''', (promo,))
         self.conn.commit()
+
+        self.conn.close()
     
 # Customer --------------------------------------------------------------------------------------------------- 
     def create_customer_table(self, customer_name, address, phone, customer_type, status):
@@ -273,10 +325,14 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
         self.cursor.execute('''
         INSERT INTO Customer (CustName, Address, Phone, Type, Status)  values (?,?,?,?,?)
         ''', (customer_name, address, phone, customer_type, status))
         self.conn.commit()
+
+        self.conn.close()
     
 # Stocks --------------------------------------------------------------------------------------------------- 
     def create_stocks_table(self, description, on_hand, available):
@@ -296,10 +352,14 @@ class SalesDBFunctions():
         ''')
         self.conn.commit()
 
+        self.conn.close()
+
         self.cursor.execute('''
         INSERT INTO Stocks (Description, OnHand, Available)  values (?,?,?)
         ''', (description, on_hand, available))
         self.conn.commit()
+
+        self.conn.close()
     
 # ItemSold --------------------------------------------------------------------------------------------------- 
     def create_item_sold_table(self):
@@ -320,3 +380,5 @@ class SalesDBFunctions():
         );
         ''')
         self.conn.commit()
+
+        self.conn.close()
