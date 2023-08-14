@@ -35,16 +35,16 @@ class ProductManagement(QWidget):
         item_data = self.cursor.fetchall()
 
         self.cursor.execute('SELECT Name FROM ItemType')
-        item_type_data = self.cursor.fetchall()
+        item_type_data = self.cursor.fetchone()
 
         self.cursor.execute('SELECT Name FROM Brand')
-        brand_data = self.cursor.fetchall()
+        brand_data = self.cursor.fetchone()
 
         self.cursor.execute('SELECT Name FROM Supplier')
-        supplier_data = self.cursor.fetchall()
+        supplier_data = self.cursor.fetchone()
 
         self.cursor.execute('SELECT Name FROM SalesGroup')
-        sales_group_data = self.cursor.fetchall()
+        sales_group_data = self.cursor.fetchone()
 
         self.cursor.execute('SELECT Cost, Discount, SellPrice, EffectiveDt FROM ItemPrice')
         item_price_data = self.cursor.fetchall()
