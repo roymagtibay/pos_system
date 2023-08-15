@@ -373,9 +373,61 @@ class EditItemQuery():
     
     def close(self):
         self.conn.close()
- 
     
+    def retrieve_item_data(self, item_id):
+        self.cursor.execute('''
+        SELECT 
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
+            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+        FROM 
+            Item
+            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
+            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
+            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
+            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+        WHERE
+            Item.ItemId = ?  -- Specify the item ID you want to retrieve
+        ''', (item_id,))
 
+        item_data = self.cursor.fetchone()  # Use fetchone to get a single row
+
+        return item_data
+
+
+class DeleteItemQuery():
+    def __init__(self, db_file='SALES.db'):
+        super().__init__()
+        # creates folder for the db file
+        self.db_folder_path = 'sales/'
+        self.db_file_path = os.path.join(self.db_folder_path, db_file)
+        os.makedirs(self.db_folder_path, exist_ok=True)
+
+        # connects to SQL database named 'SALES.db'
+        self.conn = sqlite3.connect(database=self.db_file_path)
+        self.cursor = self.conn.cursor()
+    
+    def close(self):
+        self.conn.close()
+    
+    def retrieve_item_data(self):
+        self.cursor.execute('''
+        SELECT 
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
+            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+        FROM 
+            Item
+            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
+            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
+            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
+            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+        ''')
+
+        item_data = self.cursor.fetchall()
+
+        return item_data
+    
 class ListItemQuery():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
@@ -390,56 +442,6 @@ class ListItemQuery():
     
     def close(self):
         self.conn.close()
-
-    # def retrieve_item_name_data(self):
-    #     self.cursor.execute('SELECT Name FROM Item')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_barcode_data(self):
-    #     self.cursor.execute('SELECT Barcode FROM Item')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_expire_dt_data(self):
-    #     self.cursor.execute('SELECT ExpireDt FROM Item')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_item_type_data(self):
-    #     self.cursor.execute('SELECT Name FROM ItemType')
-    #     result = self.cursor.fetchall()
-    #     return result
-        
-    # def retrieve_brand_data(self):
-    #     self.cursor.execute('SELECT Name FROM Brand')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_supplier_data(self):
-    #     self.cursor.execute('SELECT Name FROM Supplier')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_sales_group_data(self):
-    #     self.cursor.execute('SELECT Name FROM SalesGroup')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_cost_data(self):
-    #     self.cursor.execute('SELECT Cost FROM ItemPrice')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_discount_data(self):
-    #     self.cursor.execute('SELECT Discount FROM ItemPrice')
-    #     result = self.cursor.fetchall()
-    #     return result
-
-    # def retrieve_sell_price_data(self):
-    #     self.cursor.execute('SELECT SellPrice FROM ItemPrice')
-    #     result = self.cursor.fetchall()
-    #     return result
 
     def retrieve_item_data(self):
         self.cursor.execute('''

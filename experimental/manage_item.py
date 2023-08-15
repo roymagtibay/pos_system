@@ -11,12 +11,30 @@ from database_manager import AddItemQuery
 class EditItem(QDialog):
     data_stored = pyqtSignal()
 
-    def __init__(self):
+    def __init__(self, row, item):
         super().__init__()
 
         self.setWindowTitle('Edit item')
 
         self.edit_item_query = EditItemQuery()
+
+        item_1 = item[0]
+        item_2 = item[1]
+        item_3 = item[2]
+        item_4 = item[3]
+        item_5 = item[4]
+        item_6 = item[5]
+        item_7 = item[6]
+        item_8 = item[7]
+
+        print('this is 1: ', item_1)
+        print('this is 2: ', item_2)
+        print('this is 3: ', item_3)
+        print('this is 4: ', item_4)
+        print('this is 5: ', item_5)
+        print('this is 6: ', item_6)
+        print('this is 7: ', item_7)
+        print('this is 8: ', item_8)
 
         self.create_body() # allows the user of widgets in different functions
     
@@ -231,10 +249,3 @@ class AddItem(QDialog):
 
         self.setLayout(self.layout)
 
-
-
-if __name__ == ('__main__'):
-    pos_app = QApplication(sys.argv)
-    window = EditItem()
-    window.show()
-    sys.exit(pos_app.exec())
