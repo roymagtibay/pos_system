@@ -469,17 +469,17 @@ class ListItemQuery():
         #     ON item.SaleGrpId = salesgroup.SaleGrpId
         # ; ------------------------------------------------ ORIG
         self.cursor.execute('''
-        SELECT 
-            Item.Name, 
-            Item.Barcode, 
-            Item.ExpireDt,
-            ItemType.Name, 
-            Brand.Name, 
-            Supplier.Name, 
-            SalesGroup.Name, 
-            ItemPrice.Cost, 
-            ItemPrice.Discount,
-            ItemPrice.Sellprice
+        SELECT
+            COALESCE(Item.Name, 'Unknown'),
+            COALESCE(Item.Barcode, 'Unknown'),
+            COALESCE(Item.ExpireDt, 'Unknown'), 
+            COALESCE(ItemType.Name, 'Unknown') AS ItemType, 
+            COALESCE(Brand.Name, 'Unknown') AS Brand, 
+            COALESCE(SalesGroup.Name, 'Unknown') AS SalesGroup, 
+            COALESCE(Supplier.Name, 'Unknown') AS Supplier, 
+            COALESCE(ItemPrice.Cost, 'Unknown') AS Cost, 
+            COALESCE(ItemPrice.Discount, 'Unknown') AS Discount, 
+            COALESCE(ItemPrice.SellPrice, 'Unknown') AS SellPrice
                             
         FROM ItemPrice
             LEFT JOIN Item

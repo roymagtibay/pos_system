@@ -54,11 +54,23 @@ class ProductManagement(QWidget):
 
         self.item_list_table.setRowCount(len(item_data))
 
+
         for row_index, row_value in enumerate(item_data):
             print('\n')
             for col_index, cell_value in enumerate(row_value):
-                self.item_list_table.setItem(row_index, col_index, QTableWidgetItem(str(cell_value)))
+                self.item_list_table.setItem(row_index, col_index + 1, QTableWidgetItem(str(cell_value)))
                 print(cell_value, end=', ')
+            
+            edit_item_button = QPushButton('EDIT')
+            delete_item_button = QPushButton('DELETE')
+
+            # Check if the cell value in the third column is 'Unknown'
+            if row_value[2] == 'Unknown':
+                self.item_list_table.setCellWidget(row_index, 0, delete_item_button)
+                self.item_list_table.setCellWidget(row_index, 1, None)  # Clear Edit button
+            else:
+                self.item_list_table.setCellWidget(row_index, 0, edit_item_button)
+                self.item_list_table.setCellWidget(row_index, 1, None)
 
             
             # self.edit_item_button = QPushButton('EDIT')
@@ -74,10 +86,10 @@ class ProductManagement(QWidget):
         self.add_item_button.clicked.connect(self.open_add_item_window)
 
         self.item_list_table = QTableWidget()
-        self.item_list_table.setColumnCount(10)
+        self.item_list_table.setColumnCount(11)
         self.item_list_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.item_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.item_list_table.setHorizontalHeaderLabels(['Item name','Barcode','Expire date','Item type','Brand','Sales group','Supplier','Cost','Discount','Sell price'])
+        self.item_list_table.setHorizontalHeaderLabels(['','Item name','Barcode','Expire date','Item type','Brand','Sales group','Supplier','Cost','Discount','Sell price'])
 
         self.layout.addWidget(self.add_item_button)
         self.layout.addWidget(self.item_list_table)
