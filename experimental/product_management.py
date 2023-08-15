@@ -14,10 +14,13 @@ from database_manager import DeleteItemQuery
 class ProductManagement(QWidget):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('Product Management')
+        self.setGeometry(300, 100, 1000, 500)
 
         self.create_body()
         self.initate_db_table()
         self.show_item_list_table()
+        
 
     def initate_db_table(self):
         # creates table for db
@@ -43,7 +46,7 @@ class ProductManagement(QWidget):
 
     def open_edit_item_window(self, row, item):
         self.edit_item_window = EditItem(row, item)
-        # self.edit_item_window.data_stored.connect(self.show_item_list_table)
+        self.edit_item_window.data_stored.connect(self.show_item_list_table)
         self.edit_item_window.exec()
 
     def show_item_list_table(self):
@@ -61,15 +64,16 @@ class ProductManagement(QWidget):
                 self.item_list_table.setItem(row_index, col_index + 1, QTableWidgetItem(str(cell_value)))
                 print(cell_value, end=', ')
             
-            edit_item_button = QPushButton('EDIT')
-            delete_item_button = QPushButton('DELETE')
+            self.edit_item_button = QPushButton('EDIT')
+            self.edit_item_button.clicked.connect(lambda row=row_index, item=row_value: self.open_edit_item_window(row, item))
+            self.delete_item_button = QPushButton('DELETE')
 
             # Check if the cell value in the third column is 'Unknown'
-            if row_value[2] == 'Unknown':
-                self.item_list_table.setCellWidget(row_index, 0, delete_item_button)
+            if row_value[2] == 'unk':
+                self.item_list_table.setCellWidget(row_index, 0, self.delete_item_button)
                 self.item_list_table.setCellWidget(row_index, 1, None)  # Clear Edit button
             else:
-                self.item_list_table.setCellWidget(row_index, 0, edit_item_button)
+                self.item_list_table.setCellWidget(row_index, 0, self.edit_item_button)
                 self.item_list_table.setCellWidget(row_index, 1, None)
 
             
@@ -86,10 +90,10 @@ class ProductManagement(QWidget):
         self.add_item_button.clicked.connect(self.open_add_item_window)
 
         self.item_list_table = QTableWidget()
-        self.item_list_table.setColumnCount(11)
+        self.item_list_table.setColumnCount(12)
         self.item_list_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.item_list_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
-        self.item_list_table.setHorizontalHeaderLabels(['','Item name','Barcode','Expire date','Item type','Brand','Sales group','Supplier','Cost','Discount','Sell price'])
+        self.item_list_table.setHorizontalHeaderLabels(['','Item name','Barcode','Expire date','Item type','Brand','Sales group','Supplier','Cost','Discount','Sell price','Effective Date'])
 
         self.layout.addWidget(self.add_item_button)
         self.layout.addWidget(self.item_list_table)

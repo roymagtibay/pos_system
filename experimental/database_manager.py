@@ -225,10 +225,10 @@ class AddItemQuery():
 
     # def store_promo_data(self):
 
-    def store_item_price_data(self, cost, discount, sell_price):
+    def store_item_price_data(self, cost, discount, sell_price, effective_dt):
         self.cursor.execute('''
-        INSERT INTO ItemPrice (Cost, Discount, SellPrice) VALUES (?,?,?)
-        ''', (cost, discount, sell_price))
+        INSERT INTO ItemPrice (Cost, Discount, SellPrice, EffectiveDt) VALUES (?,?,?,?)
+        ''', (cost, discount, sell_price, effective_dt))
         self.conn.commit()
     
     def store_customer_data(self):
@@ -377,24 +377,73 @@ class EditItemQuery():
     def close(self):
         self.conn.close()
     
-    def retrieve_item_data(self, item_id):
+    # def retrieve_item_data(self, item_id):
+    #     self.cursor.execute('''
+    #     SELECT
+    #         COALESCE(Item.Name, 'unk'),
+    #         COALESCE(Item.Barcode, 'unk'),
+    #         COALESCE(Item.ExpireDt, 'unk'), 
+    #         COALESCE(ItemType.Name, 'unk') AS ItemType, 
+    #         COALESCE(Brand.Name, 'unk') AS Brand, 
+    #         COALESCE(SalesGroup.Name, 'unk') AS SalesGroup, 
+    #         COALESCE(Supplier.Name, 'unk') AS Supplier, 
+    #         COALESCE(ItemPrice.Cost, 0.00) AS Cost, 
+    #         COALESCE(ItemPrice.Discount, 0.00) AS Discount, 
+    #         COALESCE(ItemPrice.SellPrice, 0.00) AS SellPrice,
+    #         COALESCE(ItemPrice.EffectiveDt, 'unk') AS EffectiveDt
+                            
+    #     FROM ItemPrice
+    #         LEFT JOIN Item
+    #             ON ItemPrice.ItemId = Item.ItemId
+    #         LEFT JOIN ItemType
+    #             ON Item.ItemTypeId = ItemType.ItemTypeId
+    #         LEFT JOIN Brand
+    #             ON Item.BrandId = Brand.BrandId
+    #         LEFT JOIN Supplier
+    #             ON Item.SupplierId = Supplier.SupplierId
+    #         LEFT JOIN SalesGroup
+    #             ON Item.SaleGrpId = SalesGroup.SaleGrpId
+                            
+    #     WHERE
+    #         Item.ItemId = ?  -- Specify the item ID you want to retrieve
+    #     ''', (item_id,))
+
+    #     item_data = self.cursor.fetchall()  # Use fetchone to get a single row
+
+    #     return item_data
+    def retrieve_item_id(self, name):
         self.cursor.execute('''
-        SELECT 
-            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
-        FROM 
-            Item
-            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
-            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
-            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
-            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
-            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
-        WHERE
-            Item.ItemId = ?  -- Specify the item ID you want to retrieve
-        ''', (item_id,))
+        SELECT ItemId FROM Item WHERE Name = ?
+        ''', (name,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]  # Assuming the first column is ItemId
+        else:
+            return None
 
-        item_data = self.cursor.fetchall()  # Use fetchone to get a single row
+    def change_item_data(self, name, barcode, expire_dt, item_id):
+        self.cursor.execute('UPDATE Item SET Name = ?, Barcode = ?, ExpireDt = ? WHERE ItemId = ?', (name, barcode, expire_dt, item_id))
+        self.conn.commit()
 
-        return item_data
+    def change_item_type_data(self, name, item_id):
+        self.cursor.execute('UPDATE ItemType SET Name = ? WHERE ItemId = ?', (name, item_id))
+        self.conn.commit()
+
+    def change_brand_data(self, name, item_id):
+        self.cursor.execute('UPDATE Brand SET Name = ? WHERE Item.ItemId = ?', (name, item_id))
+        self.conn.commit()
+
+    def change_sales_group_data(self, name, item_id):
+        self.cursor.execute('UPDATE SalesGroup SET Name = ? WHERE Item.ItemId = ?', (name, item_id))
+        self.conn.commit()
+    
+    def change_supplier_data(self, name, item_id):
+        self.cursor.execute('UPDATE Supplier SET Name = ? WHERE Item.ItemId = ?', (name, item_id))
+        self.conn.commit()
+
+    def change_item_price_data(self, cost, discount, sell_price, effective_dt, item_id):
+        self.cursor.execute('UPDATE ItemPrice SET Cost = ?, Discount = ?, SellPrice = ?, EffectiveDt = ? WHERE Item.ItemId = ?', (cost, discount, sell_price, effective_dt, item_id))
+        self.conn.commit()
 
 class DeleteItemQuery():
     def __init__(self, db_file='SALES.db'):
@@ -468,18 +517,23 @@ class ListItemQuery():
         # INNER JOIN  SalesGroup salesgroup
         #     ON item.SaleGrpId = salesgroup.SaleGrpId
         # ; ------------------------------------------------ ORIG
+
+
+        # put an ItemId above ItemName
         self.cursor.execute('''
         SELECT
-            COALESCE(Item.Name, 'Unknown'),
-            COALESCE(Item.Barcode, 'Unknown'),
-            COALESCE(Item.ExpireDt, 'Unknown'), 
-            COALESCE(ItemType.Name, 'Unknown') AS ItemType, 
-            COALESCE(Brand.Name, 'Unknown') AS Brand, 
-            COALESCE(SalesGroup.Name, 'Unknown') AS SalesGroup, 
-            COALESCE(Supplier.Name, 'Unknown') AS Supplier, 
-            COALESCE(ItemPrice.Cost, 'Unknown') AS Cost, 
-            COALESCE(ItemPrice.Discount, 'Unknown') AS Discount, 
-            COALESCE(ItemPrice.SellPrice, 'Unknown') AS SellPrice
+            
+            COALESCE(Item.Name, 'unk'),
+            COALESCE(Item.Barcode, 'unk'),
+            COALESCE(Item.ExpireDt, 'unk'), 
+            COALESCE(ItemType.Name, 'unk') AS ItemType, 
+            COALESCE(Brand.Name, 'unk') AS Brand, 
+            COALESCE(SalesGroup.Name, 'unk') AS SalesGroup, 
+            COALESCE(Supplier.Name, 'unk') AS Supplier, 
+            ItemPrice.Cost,
+            ItemPrice.Discount,
+            ItemPrice.SellPrice,
+            ItemPrice.EffectiveDt, 'unk') AS EffectiveDt
                             
         FROM ItemPrice
             LEFT JOIN Item
