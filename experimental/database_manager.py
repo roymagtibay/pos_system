@@ -107,15 +107,16 @@ class InitTableQuery():
         self.conn.commit()
 
     def initiate_item_price_table(self):
+
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS ItemPrice (
             ItemPriceId INTEGER PRIMARY KEY AUTOINCREMENT,
             ItemId INTEGER DEFAULT 0,
             EffectiveDt DATETIME,
             PromoId INTEGER DEFAULT 0,
-            Cost DECIMAL(15, 2),
-            Discount DECIMAL(15, 2),
-            SellPrice DECIMAL(15, 2),
+            Cost DECIMAL(15, 2) DEFAULT 0,
+            Discount DECIMAL(15, 2) DEFAULT 0,
+            SellPrice DECIMAL(15, 2) DEFAULT 0,
             UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
             
             FOREIGN KEY (ItemId) REFERENCES Item(ItemId),
@@ -443,16 +444,54 @@ class ListItemQuery():
         self.conn.close()
 
     def retrieve_item_data(self):
+        # SELECT 
+        #     item.ItemName, 
+        #     item.Barcode, 
+        #     itemtype.Name, 
+        #     brand.Name, 
+        #     supplier.Name, 
+        #     salesgroup.Name, 
+        #     itemprice.Cost, 
+        #     itemprice.Discount,
+        #     itemprice.Sellprice,
+        #     item.ExpireDt,
+        #     itemprice.EffectiveDt
+        # FROM ItemPrice itemprice
+        # INNER JOIN Item item
+        #     ON itemprice.ItemId = item.ItemId
+        # INNER JOIN 	ItemType itemtype
+        #     ON item.ItemTypeId = itemtype.ItemTypeId
+        # INNER JOIN  Brand brand
+        #     ON item.BrandId = brand.BrandId
+        # INNER JOIN  Supplier supplier
+        #     ON item.SupplierId = supplier.SupplierId
+        # INNER JOIN  SalesGroup salesgroup
+        #     ON item.SaleGrpId = salesgroup.SaleGrpId
+        # ; ------------------------------------------------ ORIG
         self.cursor.execute('''
-        SELECT
-            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
-        FROM 
-            Item
-            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
-            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
-            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
-            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
-            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+        SELECT 
+            Item.Name, 
+            Item.Barcode, 
+            Item.ExpireDt,
+            ItemType.Name, 
+            Brand.Name, 
+            Supplier.Name, 
+            SalesGroup.Name, 
+            ItemPrice.Cost, 
+            ItemPrice.Discount,
+            ItemPrice.Sellprice
+                            
+        FROM ItemPrice
+            LEFT JOIN Item
+                ON ItemPrice.ItemId = Item.ItemId
+            LEFT JOIN ItemType
+                ON Item.ItemTypeId = ItemType.ItemTypeId
+            LEFT JOIN Brand
+                ON Item.BrandId = Brand.BrandId
+            LEFT JOIN Supplier
+                ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN SalesGroup
+                ON Item.SaleGrpId = SalesGroup.SaleGrpId
         ''')
 
         item_data = self.cursor.fetchall()
