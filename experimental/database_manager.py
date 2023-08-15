@@ -243,6 +243,8 @@ class AddItemQuery():
         ''')
         self.conn.commit()
 
+
+
     # store ids
     def store_id_to_item(self, item_type_id, brand_id, sales_group_id, supplier_id, name):
         self.cursor.execute('''
@@ -530,10 +532,10 @@ class ListItemQuery():
             COALESCE(Brand.Name, 'unk') AS Brand, 
             COALESCE(SalesGroup.Name, 'unk') AS SalesGroup, 
             COALESCE(Supplier.Name, 'unk') AS Supplier, 
-            ItemPrice.Cost,
-            ItemPrice.Discount,
-            ItemPrice.SellPrice,
-            ItemPrice.EffectiveDt, 'unk') AS EffectiveDt
+            COALESCE(ItemPrice.Cost, 0.00) AS Cost, 
+            COALESCE(ItemPrice.Discount, 0.00) AS Discount, 
+            COALESCE(ItemPrice.SellPrice, 0.00) AS SellPrice,
+            COALESCE(ItemPrice.EffectiveDt, 'unk') AS EffectiveDt
                             
         FROM ItemPrice
             LEFT JOIN Item

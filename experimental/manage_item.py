@@ -196,12 +196,12 @@ class AddItem(QDialog):
 
 
         # conversion
-        item_id = int(item_id_text) if item_id_text else None
-        item_type_id = int(item_type_id_text) if item_type_id_text else None
-        brand_id = int(brand_id_text) if brand_id_text else None
-        sales_group_id = int(sales_group_id_text) if sales_group_id_text else None
-        supplier_id = int(supplier_id_text) if supplier_id_text else None
-        item_price_id = int(item_price_id_text) if item_price_id_text else None
+        item_id = int(item_id_text) 
+        item_type_id = int(item_type_id_text) 
+        brand_id = int(brand_id_text) 
+        sales_group_id = int(sales_group_id_text) 
+        supplier_id = int(supplier_id_text) 
+        item_price_id = int(item_price_id_text) 
         
         self.store_id(item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id)
 
@@ -217,12 +217,10 @@ class AddItem(QDialog):
     def store_id(self, item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id):
         self.add_item_query = AddItemQuery()
 
-        self.add_item_query.store_id_to_item(item_type_id,  brand_id, sales_group_id, supplier_id, item_name_data)
         self.add_item_query.store_id_to_item_price_data(item_id, item_price_id)
+        self.add_item_query.store_id_to_item(item_type_id,  brand_id, sales_group_id, supplier_id, item_name_data)
 
         self.data_stored.emit()
-
-        self.add_item_query.close()
     
         self.accept()
 
