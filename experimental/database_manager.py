@@ -2,7 +2,7 @@ import sqlite3 # pre-installed in python (if not, install it using 'pip install 
 import os 
 
 
-class SalesCreateQuery():
+class InitTableQuery():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # creates folder for the db file
@@ -171,7 +171,7 @@ class SalesCreateQuery():
         ''')
         self.conn.commit()
 
-class SalesInsertQuery():
+class AddItemQuery():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # creates folder for the db file
@@ -257,28 +257,6 @@ class SalesInsertQuery():
         ''', (item_id, item_price_id))
         self.conn.commit()
 
-class SalesUpdateQuery():
-    def __init__(self):
-        super().__init__()
-
-        # connects to SQL database named 'SALES.db'
-        self.conn = sqlite3.connect('SALES.db')
-        self.cursor = self.conn.cursor()
-    
-class SalesSelectQuery():
-    def __init__(self, db_file='SALES.db'):
-        super().__init__()
-        # creates folder for the db file
-        self.db_folder_path = 'sales/'
-        self.db_file_path = os.path.join(self.db_folder_path, db_file)
-        os.makedirs(self.db_folder_path, exist_ok=True)
-
-        # connects to SQL database named 'SALES.db'
-        self.conn = sqlite3.connect(database=self.db_file_path)
-        self.cursor = self.conn.cursor()
-    
-    def close(self):
-        self.conn.close()
         
     # retrieve table ids
     def retrieve_item_id(self, name):
@@ -380,6 +358,108 @@ class SalesSelectQuery():
             return result[0]
         else:
             return None
+
+class EditItemQuery():
+    def __init__(self, db_file='SALES.db'):
+        super().__init__()
+        # creates folder for the db file
+        self.db_folder_path = 'sales/'
+        self.db_file_path = os.path.join(self.db_folder_path, db_file)
+        os.makedirs(self.db_folder_path, exist_ok=True)
+
+        # connects to SQL database named 'SALES.db'
+        self.conn = sqlite3.connect(database=self.db_file_path)
+        self.cursor = self.conn.cursor()
+    
+    def close(self):
+        self.conn.close()
+    
+    def retrieve_item_data(self, item_id):
+        self.cursor.execute('''
+        SELECT 
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
+            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+        FROM 
+            Item
+            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
+            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
+            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
+            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+        WHERE
+            Item.ItemId = ?  -- Specify the item ID you want to retrieve
+        ''', (item_id,))
+
+        item_data = self.cursor.fetchone()  # Use fetchone to get a single row
+
+        return item_data
+
+
+class DeleteItemQuery():
+    def __init__(self, db_file='SALES.db'):
+        super().__init__()
+        # creates folder for the db file
+        self.db_folder_path = 'sales/'
+        self.db_file_path = os.path.join(self.db_folder_path, db_file)
+        os.makedirs(self.db_folder_path, exist_ok=True)
+
+        # connects to SQL database named 'SALES.db'
+        self.conn = sqlite3.connect(database=self.db_file_path)
+        self.cursor = self.conn.cursor()
+    
+    def close(self):
+        self.conn.close()
+    
+    def retrieve_item_data(self):
+        self.cursor.execute('''
+        SELECT 
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
+            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+        FROM 
+            Item
+            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
+            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
+            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
+            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+        ''')
+
+        item_data = self.cursor.fetchall()
+
+        return item_data
+    
+class ListItemQuery():
+    def __init__(self, db_file='SALES.db'):
+        super().__init__()
+        # creates folder for the db file
+        self.db_folder_path = 'sales/'
+        self.db_file_path = os.path.join(self.db_folder_path, db_file)
+        os.makedirs(self.db_folder_path, exist_ok=True)
+
+        # connects to SQL database named 'SALES.db'
+        self.conn = sqlite3.connect(database=self.db_file_path)
+        self.cursor = self.conn.cursor()
+    
+    def close(self):
+        self.conn.close()
+
+    def retrieve_item_data(self):
+        self.cursor.execute('''
+        SELECT 
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
+            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+        FROM 
+            Item
+            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
+            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
+            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
+            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+        ''')
+
+        item_data = self.cursor.fetchall()
+
+        return item_data
 
 class SalesDropQuery():
     def __init__(self):
