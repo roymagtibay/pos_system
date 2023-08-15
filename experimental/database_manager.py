@@ -24,12 +24,14 @@ class InitTableQuery():
             Name TEXT,
             Barcode TEXT,
             ItemTypeId INTEGER DEFAULT 0,
+            BrandId INTEGER DEFAULT 0,
             SaleGrpId INTEGER DEFAULT 0,
             SupplierId INTEGER DEFAULT 0,
             ExpireDt DATETIME,
             UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
             
             FOREIGN KEY (ItemTypeId) REFERENCES ItemType(ItemTypeId),
+            FOREIGN KEY (BrandId) REFERENCES Brand(BrandId),
             FOREIGN KEY (SaleGrpId) REFERENCES SalesGroup(SaleGrpId),
             FOREIGN KEY (SupplierId) REFERENCES Supplier(SupplierId)
         );
@@ -241,12 +243,12 @@ class AddItemQuery():
         self.conn.commit()
 
     # store ids
-    def store_id_to_item(self, item_type_id, sales_group_id, supplier_id, name):
+    def store_id_to_item(self, item_type_id, brand_id, sales_group_id, supplier_id, name):
         self.cursor.execute('''
         UPDATE Item
-        SET ItemTypeId = ?, SaleGrpId = ?, SupplierId = ?
+        SET ItemTypeId = ?, BrandId = ?, SaleGrpId = ?, SupplierId = ?
         WHERE Name = ?
-        ''', (item_type_id, sales_group_id, supplier_id, name))
+        ''', (item_type_id, brand_id, sales_group_id, supplier_id, name))
         self.conn.commit()
         
     def store_id_to_item_price_data(self, item_id, item_price_id):
@@ -377,8 +379,7 @@ class EditItemQuery():
     def retrieve_item_data(self, item_id):
         self.cursor.execute('''
         SELECT 
-            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
-            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
         FROM 
             Item
             LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
@@ -390,10 +391,9 @@ class EditItemQuery():
             Item.ItemId = ?  -- Specify the item ID you want to retrieve
         ''', (item_id,))
 
-        item_data = self.cursor.fetchone()  # Use fetchone to get a single row
+        item_data = self.cursor.fetchall()  # Use fetchone to get a single row
 
         return item_data
-
 
 class DeleteItemQuery():
     def __init__(self, db_file='SALES.db'):
@@ -413,15 +413,14 @@ class DeleteItemQuery():
     def retrieve_item_data(self):
         self.cursor.execute('''
         SELECT 
-            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
-            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
         FROM 
             Item
-            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
-            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
-            LEFT JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
-            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
-            LEFT JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
+            INNER JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
+            INNER JOIN Brand ON Item.BrandId = Brand.BrandId
+            INNER JOIN SalesGroup ON Item.SaleGrpId = SalesGroup.SaleGrpId
+            INNER JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
+            INNER JOIN ItemPrice ON Item.ItemId = ItemPrice.ItemId
         ''')
 
         item_data = self.cursor.fetchall()
@@ -445,9 +444,8 @@ class ListItemQuery():
 
     def retrieve_item_data(self):
         self.cursor.execute('''
-        SELECT 
-            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, 
-            SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
+        SELECT
+            Item.Name, Item.Barcode, Item.ExpireDt, ItemType.Name, Brand.Name, SalesGroup.Name, Supplier.Name, ItemPrice.Cost, ItemPrice.Discount, ItemPrice.SellPrice
         FROM 
             Item
             LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
@@ -460,73 +458,3 @@ class ListItemQuery():
         item_data = self.cursor.fetchall()
 
         return item_data
-
-class SalesDropQuery():
-    def __init__(self):
-        super().__init__()
-
-        # connects to SQL database named 'SALES.db'
-        self.conn = sqlite3.connect('SALES.db')
-        self.cursor = self.conn.cursor()
-
-    def drop_item_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS Item;
-        ''')
-        self.conn.commit()
-
-    def drop_item_type_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS ItemType;
-        ''')
-        self.conn.commit()
-
-    def drop_brand_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS Brand;
-        ''')
-        self.conn.commit()
-
-    def drop_sales_group_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS SalesGroup;
-        ''')
-        self.conn.commit()
-
-    def drop_supplier_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS Supplier;
-        ''')
-        self.conn.commit()
-
-    # (runs every Nth day of the month on ItemPrice ,  If near expiring Item(ExpireDt) - Today < N days then update ItemPrice(PromoId))
-    def drop_promo_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS Promo;
-        ''')
-        self.conn.commit()
-
-    def drop_item_price_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS ItemPrice;
-        ''')
-        self.conn.commit()
-
-    def drop_customer_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS Customer;
-        ''')
-        self.conn.commit()
-
-    def drop_stocks_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS Stocks;
-        ''')
-        self.conn.commit()
-
-    def drop_item_sold_table(self):
-        self.cursor.execute('''
-        DROP TABLE IF EXISTS ItemSold;
-        ''')
-        self.conn.commit()
-        

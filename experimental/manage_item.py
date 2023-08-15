@@ -18,28 +18,14 @@ class EditItem(QDialog):
 
         self.edit_item_query = EditItemQuery()
 
-        item_1 = item[0]
-        item_2 = item[1]
-        item_3 = item[2]
-        item_4 = item[3]
-        item_5 = item[4]
-        item_6 = item[5]
-        item_7 = item[6]
-        item_8 = item[7]
 
-        print('this is 1: ', item_1)
-        print('this is 2: ', item_2)
-        print('this is 3: ', item_3)
-        print('this is 4: ', item_4)
-        print('this is 5: ', item_5)
-        print('this is 6: ', item_6)
-        print('this is 7: ', item_7)
-        print('this is 8: ', item_8)
 
-        self.create_body() # allows the user of widgets in different functions
+        self.create_body(item) # allows the user of widgets in different functions
     
-    def create_body(self):
+    def create_body(self, item):
         self.layout = QGridLayout()
+
+        
 
         self.item_name = QLineEdit()
         self.item_name.setPlaceholderText('Item name')
@@ -72,7 +58,17 @@ class EditItem(QDialog):
         # self.effective_date = QDateEdit()
         self.save_button = QPushButton('SAVE ITEM')
         # self.save_button.clicked.connect(lambda: self.store_data(self.item_name, self.barcode, self.expire_date, self.item_type, self.brand_name, self.sales_group_name, self.supplier_name, self.cost, self.discount, self.sell_price))
-
+        
+        self.item_name.setText(item[0])
+        self.barcode.setText(item[1])
+        # self.expire_date.setDate(item[2])
+        self.item_type.setCurrentText(item[3])
+        self.brand_name.setCurrentText(item[4])
+        self.sales_group_name.setCurrentText(item[5])
+        self.supplier_name.setCurrentText(item[6])
+        # self.cost.setText(item[7])
+        # self.discount.setText(item[8])
+        # self.sell_price.setText(item[9])
 
         self.layout.addWidget(self.item_name)
         self.layout.addWidget(self.barcode)
@@ -131,14 +127,12 @@ class AddItem(QDialog):
         self.add_item_query.store_supplier_data(supplier_name_data)
         self.add_item_query.store_item_price_data(cost_data, discount_data, sell_price_data)
 
-        self.retrieve_id(item_name_data, barcode_data, expire_date_data, item_type_data, brand_name_data, sales_group_name_data, supplier_name_data, cost_data, discount_data, sell_price_data)
+        self.retrieve_id(item_name_data, item_type_data, brand_name_data, sales_group_name_data, supplier_name_data, cost_data, discount_data, sell_price_data)
 
 
-    def retrieve_id(self, item_name_data, barcode_data, expire_date_data, item_type_data, brand_name_data, sales_group_name_data, supplier_name_data, cost_data, discount_data, sell_price_data):
+    def retrieve_id(self, item_name_data, item_type_data, brand_name_data, sales_group_name_data, supplier_name_data, cost_data, discount_data, sell_price_data):
         
         item_name_data = self.item_name.text()
-        barcode_data = self.barcode.text()
-        expire_date_data = self.expire_date.date().toString(Qt.DateFormat.ISODate)
 
         item_type_data = self.item_type.currentText()
         brand_name_data = self.brand_name.currentText()
@@ -172,7 +166,7 @@ class AddItem(QDialog):
         supplier_id = int(supplier_id_text) if supplier_id_text else None
         item_price_id = int(item_price_id_text) if item_price_id_text else None
         
-        self.store_id(item_name_data, item_id, item_type_id, sales_group_id, supplier_id, item_price_id)
+        self.store_id(item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id)
 
         os.system('cls')
         print('This is the item_id:', item_id)
@@ -183,10 +177,10 @@ class AddItem(QDialog):
         print('This is the item_price_id:', item_price_id)
 
 
-    def store_id(self, item_name_data, item_id, item_type_id, sales_group_id, supplier_id, item_price_id):
+    def store_id(self, item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id):
         self.add_item_query = AddItemQuery()
 
-        self.add_item_query.store_id_to_item(item_type_id, sales_group_id, supplier_id, item_name_data)
+        self.add_item_query.store_id_to_item(item_type_id,  brand_id, sales_group_id, supplier_id, item_name_data)
         self.add_item_query.store_id_to_item_price_data(item_id, item_price_id)
 
         self.data_stored.emit()
