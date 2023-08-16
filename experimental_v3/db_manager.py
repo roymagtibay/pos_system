@@ -175,6 +175,7 @@ class StoreData():
             EffectiveDt = ?
         )''', (item_id, cost, discount, sell_price, effective_dt,
               item_id, cost, discount, sell_price, effective_dt))
+        self.conn.commit()
 
 
 class RetrieveId():
@@ -239,11 +240,11 @@ class RetrieveId():
 
         return item_id[0]
 
-    def item_price_id(self, item_id, cost, discount, sell_price):
+    def item_price_id(self, item_id, cost, discount, sell_price, effective_dt):
         self.cursor.execute('''
         SELECT ItemPriceId FROM ItemPrice
-        WHERE ItemId = ? AND Cost = ? AND Discount = ? AND SellPrice = ?
-        ''', (item_id, cost, discount, sell_price))
+        WHERE ItemId = ? AND Cost = ? AND Discount = ? AND SellPrice = ? AND EffectiveDt = ?
+        ''', (item_id, cost, discount, sell_price, effective_dt))
 
         item_price_id = self.cursor.fetchone()
 
