@@ -53,16 +53,14 @@ class ProductManagement(QWidget):
         self.list_item = ListItemQuery()
 
         item_data = self.list_item.retrieve_item_data()
-        print(item_data)
+        # print(item_data)
 
         self.item_list_table.setRowCount(len(item_data))
 
 
         for row_index, row_value in enumerate(item_data):
-            print('\n')
             for col_index, cell_value in enumerate(row_value):
                 self.item_list_table.setItem(row_index, col_index + 1, QTableWidgetItem(str(cell_value)))
-                print(cell_value, end=', ')
             
             self.edit_item_button = QPushButton('EDIT')
             self.edit_item_button.clicked.connect(lambda row=row_index, item=row_value: self.open_edit_item_window(row, item))

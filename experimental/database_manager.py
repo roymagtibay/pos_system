@@ -243,7 +243,15 @@ class AddItemQuery():
         ''')
         self.conn.commit()
 
-
+    def retrieve_item_id_from_item_price(self, item_price_id):
+        self.cursor.execute('''
+        SELECT ItemId from ItemPrice WHERE ItemPriceId = ?
+        ''', (item_price_id,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
 
     # store ids
     def store_id_to_item(self, item_type_id, brand_id, sales_group_id, supplier_id, name):
@@ -262,7 +270,6 @@ class AddItemQuery():
         ''', (item_id, item_price_id))
         self.conn.commit()
 
-        
     # retrieve table ids
     def retrieve_item_id(self, name):
         self.cursor.execute('''
@@ -525,7 +532,7 @@ class ListItemQuery():
         self.cursor.execute('''
         SELECT
             
-            COALESCE(Item.Name, 'unk'),
+            COALESCE(Item.ItemName, 'unk'),
             COALESCE(Item.Barcode, 'unk'),
             COALESCE(Item.ExpireDt, 'unk'), 
             COALESCE(ItemType.Name, 'unk') AS ItemType, 
@@ -547,7 +554,7 @@ class ListItemQuery():
             LEFT JOIN Supplier
                 ON Item.SupplierId = Supplier.SupplierId
             LEFT JOIN SalesGroup
-                ON Item.SaleGrpId = SalesGroup.SaleGrpId
+                ON Item.SalesGroupId = SalesGroup.SalesGroupId
         ''')
 
         item_data = self.cursor.fetchall()

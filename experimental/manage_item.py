@@ -203,16 +203,17 @@ class AddItem(QDialog):
         supplier_id = int(supplier_id_text) 
         item_price_id = int(item_price_id_text) 
         
-        self.store_id(item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id)
 
         os.system('cls')
-        print('This is the item_id:', item_id)
-        print('This is the item_type_id:', item_type_id)
-        print('This is the brand_id:', brand_id)
-        print('This is the sales_group_id:', sales_group_id)
-        print('This is the supplier_id:', supplier_id)
-        print('This is the item_price_id:', item_price_id)
+        print('RETRIEVED -> item_id:', item_id)
+        print('RETRIEVED -> item_type_id:', item_type_id)
+        print('RETRIEVED -> brand_id:', brand_id)
+        print('RETRIEVED -> sales_group_id:', sales_group_id)
+        print('RETRIEVED -> supplier_id:', supplier_id)
+        print('RETRIEVED -> item_price_id:', item_price_id)
+        print('\n')
 
+        self.store_id(item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id)
 
     def store_id(self, item_name_data, item_id, item_type_id, brand_id, sales_group_id, supplier_id, item_price_id):
         self.add_item_query = AddItemQuery()
@@ -220,6 +221,20 @@ class AddItem(QDialog):
         self.add_item_query.store_id_to_item_price_data(item_id, item_price_id)
         self.add_item_query.store_id_to_item(item_type_id,  brand_id, sales_group_id, supplier_id, item_name_data)
 
+
+        print('STORED -> item_id:', item_id)
+        print('STORED -> item_type_id:', item_type_id)
+        print('STORED -> brand_id:', brand_id)
+        print('STORED -> sales_group_id:', sales_group_id)
+        print('STORED -> supplier_id:', supplier_id)
+        print('STORED -> item_price_id:', item_price_id)
+        print('\n')
+
+        item_id_stored_text = self.add_item_query.retrieve_item_id_from_item_price(item_price_id)
+        item_id_stored = int(item_id_stored_text)
+
+        print('THIS IS THE ID STORED -> item_id:', item_id_stored)
+        print('\n')
         self.data_stored.emit()
     
         self.accept()
