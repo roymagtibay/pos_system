@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.db_manager import *
 
 from item_management import ItemManagement
+from customer_management import CustomerManagement
 
 class AdminMainWindow(QWidget):
     def __init__(self):
@@ -32,10 +33,11 @@ class AdminMainWindow(QWidget):
         self.content_container.setCurrentIndex(0)
 
         item_management_tab = ItemManagement()
+        customer_management_tab = ItemManagement()
 
         self.content_container.addWidget(item_management_tab)
         # self.content_container.addWidget()
-        # self.content_container.addWidget()
+        self.content_container.addWidget(customer_management_tab)
         # self.content_container.addWidget()
 
         return self.content_container

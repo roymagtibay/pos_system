@@ -19,23 +19,12 @@ class EditItemWindow(QDialog):
 
         self.create_layout(row_index, row_value)
 
-    def step_a(self, raw_item_name, raw_barcode, raw_expire_dt, raw_item_type, raw_brand, raw_sales_group, raw_supplier, converted_item_id, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id):
+    def step_a(self, raw_item_name, raw_barcode, raw_expire_dt, converted_item_id, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id):
         converted_item_name = str(raw_item_name.currentText())
         converted_barcode = str(raw_barcode.text())
         converted_expire_dt = raw_expire_dt.date().toString(Qt.DateFormat.ISODate)
-        converted_item_type = str(raw_item_type.currentText())
-        converted_brand = str(raw_brand.currentText())
-        converted_sales_group = str(raw_sales_group.currentText())
-        converted_supplier = str(raw_supplier.currentText())
 
-        print('STEP A IDs:')
-        print(converted_item_id, end=', ')
-        print(converted_item_type_id, end=', ')
-        print(converted_brand_id, end=', ')
-        print(converted_sales_group_id, end=', ')
-        print(converted_supplier_id, end=', ')
-
-        self.change_query.all_item_data(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_id, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id)
+        self.change_query.all_item_data(converted_item_name, converted_barcode, converted_expire_dt, converted_item_id, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id)
 
         self.data_saved.emit()
 
@@ -44,6 +33,9 @@ class EditItemWindow(QDialog):
     def create_layout(self, row_index, row_value):
         self.layout = QGridLayout()
 
+        self.disable_item = QLabel('Disable this item?')
+        self.disable_item_y = QRadioButton('Yes')
+        self.disable_item_n = QRadioButton('No')
         self.item_name_field = QComboBox()
         self.barcode_field = QLineEdit()
         self.expire_dt_field = QDateEdit()
@@ -57,6 +49,7 @@ class EditItemWindow(QDialog):
         self.effective_dt_field = QDateEdit()
         self.save_item_button = QPushButton('SAVE ITEM')
 
+        self.disable_item_n.setChecked(True)
         self.item_name_field.setEditable(True)
         self.barcode_field.setPlaceholderText('Barcode')
         self.expire_dt_field.setDate(QDate.currentDate())
@@ -65,6 +58,16 @@ class EditItemWindow(QDialog):
         self.sales_group_field.addItem('Retail')
         self.sales_group_field.addItem('Wholesale')
         self.supplier_field.setEditable(True)
+
+        self.item_type_field.setDisabled(True)
+        self.brand_field.setDisabled(True)
+        self.sales_group_field.setDisabled(True)
+        self.supplier_field.setDisabled(True)
+        self.cost_field.setDisabled(True)
+        self.discount_field.setDisabled(True)
+        self.sell_price_field.setDisabled(True)
+        self.effective_dt_field.setDisabled(True)
+
         self.cost_field.setDisabled(True)
         self.discount_field.setDisabled(True)
         self.sell_price_field.setDisabled(True)
@@ -96,8 +99,11 @@ class EditItemWindow(QDialog):
         print(self.sales_group_id_data, end=', ')
         print(self.supplier_id_data, end=', ')
 
-        self.save_item_button.clicked.connect(lambda: self.step_a(self.item_name_field, self.barcode_field, self.expire_dt_field, self.item_type_field, self.brand_field, self.sales_group_field, self.supplier_field, self.item_id_data, self.item_type_id_data, self.brand_id_data, self.sales_group_id_data, self.supplier_id_data))
+        self.save_item_button.clicked.connect(lambda: self.step_a(self.item_name_field, self.barcode_field, self.expire_dt_field, self.item_id_data, self.item_type_id_data, self.brand_id_data, self.sales_group_id_data, self.supplier_id_data))
 
+        self.layout.addWidget(self.disable_item)
+        self.layout.addWidget(self.disable_item_y)
+        self.layout.addWidget(self.disable_item_n)
         self.layout.addWidget(self.item_name_field)
         self.layout.addWidget(self.barcode_field)
         self.layout.addWidget(self.expire_dt_field)
@@ -125,6 +131,15 @@ class AddItemWindow(QDialog):
         self.retrieve_data_id = RetrieveId()
 
         self.create_layout()
+
+    def display_inventory_field(self, flag):
+        if flag == 'Yes':
+            self.on_hand_stock_field.show()
+            self.available_stock_field.show()
+
+        elif flag == 'No':
+            self.on_hand_stock_field.hide()
+            self.available_stock_field.hide()
 
     def step_a(self, raw_item_name, raw_barcode, raw_expire_dt, raw_item_type, raw_brand, raw_sales_group, raw_supplier, raw_cost, raw_discount, raw_sell_price, raw_effective_dt):
         converted_item_type = str(raw_item_type.currentText())
@@ -186,6 +201,12 @@ class AddItemWindow(QDialog):
         self.discount_field = QLineEdit()
         self.sell_price_field = QLineEdit()
         self.effective_dt_field = QDateEdit()
+        self.track_inventory = QLabel('Track inventory for this item?')
+        self.track_inventory_y = QRadioButton('Yes')
+        self.track_inventory_n = QRadioButton('No')
+        self.on_hand_stock_field = QLineEdit()
+        self.available_stock_field = QLineEdit()
+        self.spacer = QFrame()
         self.save_item_button = QPushButton('SAVE ITEM')
 
         self.item_name_field.setEditable(True)
@@ -197,6 +218,7 @@ class AddItemWindow(QDialog):
         self.sales_group_field.addItem('Wholesale')
         self.supplier_field.setEditable(True)
         self.cost_field.setPlaceholderText('Cost')
+        self.track_inventory_y.setChecked(True)
         self.discount_field.setPlaceholderText('Discount')
         self.sell_price_field.setPlaceholderText('Sell price')
         self.effective_dt_field.setDate(QDate.currentDate())
@@ -213,6 +235,9 @@ class AddItemWindow(QDialog):
         self.sell_price_field.setText(str(50.75))
         self.effective_dt_field.setDate(QDate.currentDate())
 
+        self.track_inventory_y.clicked.connect(lambda: self.display_inventory_field('Yes'))
+        self.track_inventory_n.clicked.connect(lambda: self.display_inventory_field('No'))
+
         self.save_item_button.clicked.connect(lambda: self.step_a(self.item_name_field, self.barcode_field, self.expire_dt_field, self.item_type_field, self.brand_field, self.sales_group_field, self.supplier_field, self.cost_field, self.discount_field, self.sell_price_field, self.effective_dt_field))
 
         self.layout.addWidget(self.item_name_field)
@@ -226,6 +251,12 @@ class AddItemWindow(QDialog):
         self.layout.addWidget(self.discount_field)
         self.layout.addWidget(self.sell_price_field)
         self.layout.addWidget(self.effective_dt_field)
+        self.layout.addWidget(self.track_inventory)
+        self.layout.addWidget(self.track_inventory_y)
+        self.layout.addWidget(self.track_inventory_n)
+        self.layout.addWidget(self.on_hand_stock_field)
+        self.layout.addWidget(self.available_stock_field)
+        self.layout.addWidget(self.spacer)
         self.layout.addWidget(self.save_item_button)
 
         self.setLayout(self.layout)

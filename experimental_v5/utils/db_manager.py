@@ -100,6 +100,7 @@ class InitDatabaseTable():
         ''')
         self.conn.commit()
 
+
 # queries for adding item/s
 class StoreData():
     def __init__(self, db_file='SALES.db'):
@@ -324,7 +325,7 @@ class ChangeData():
         self.conn = sqlite3.connect(database=self.db_file_path)
         self.cursor = self.conn.cursor()
 
-    def all_item_data(self, item_name, barcode, expire_dt, item_type, brand, sales_group, supplier, item_id, item_type_id, brand_id, sales_group_id, supplier_id):
+    def all_item_data(self, item_name, barcode, expire_dt, item_id, item_type_id, brand_id, sales_group_id, supplier_id):
         self.cursor.execute('''
         UPDATE Item
         SET ItemName = ?,
@@ -332,30 +333,6 @@ class ChangeData():
             ExpireDt = ?
         WHERE ItemId = ? AND ItemTypeId = ? AND BrandId = ? AND SalesGroupId = ? AND SupplierId = ?;
         ''', (item_name, barcode, expire_dt, item_id, item_type_id, brand_id, sales_group_id, supplier_id))
-        
-        self.cursor.execute('''
-        UPDATE ItemType
-        SET Name = ?
-        WHERE ItemTypeId = (SELECT ItemTypeId FROM Item WHERE ItemId = ?)
-        ''', (item_type, item_id))
-        
-        self.cursor.execute('''
-        UPDATE Brand
-        SET Name = ?
-        WHERE BrandId = (SELECT BrandId FROM Item WHERE ItemId = ?)
-        ''', (brand, item_id))
-        
-        self.cursor.execute('''
-        UPDATE SalesGroup
-        SET Name = ?
-        WHERE SalesGroupId = (SELECT SalesGroupId FROM Item WHERE ItemId = ?)
-        ''', (sales_group, item_id))
-        
-        self.cursor.execute('''
-        UPDATE Supplier
-        SET Name = ?
-        WHERE SupplierId = (SELECT SupplierId FROM Item WHERE ItemId = ?)
-        ''', (supplier, item_id))
 
         self.conn.commit()
 
@@ -409,4 +386,3 @@ class RetrieveData():
 
         return all_data
     
-
