@@ -7,9 +7,11 @@ from PyQt6 import *
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.db_manager import *
+from utils.init_db_manager import *
 
 from item_management import ItemManagement
+from inventory_management import InventoryManagement
+from promo_management import PromoManagement
 from customer_management import CustomerManagement
 
 class AdminMainWindow(QWidget):
@@ -33,11 +35,15 @@ class AdminMainWindow(QWidget):
         self.content_container.setCurrentIndex(0)
 
         item_management_tab = ItemManagement()
-        customer_management_tab = ItemManagement()
+        inventory_management_tab = InventoryManagement()
+        promo_management_tab = PromoManagement()
+        customer_management_tab = CustomerManagement()
 
         self.content_container.addWidget(item_management_tab)
-        # self.content_container.addWidget()
+        self.content_container.addWidget(inventory_management_tab)
+        self.content_container.addWidget(promo_management_tab)
         self.content_container.addWidget(customer_management_tab)
+        # self.content_container.addWidget()
         # self.content_container.addWidget()
 
         return self.content_container
@@ -49,18 +55,21 @@ class AdminMainWindow(QWidget):
         item_management = QPushButton('Item')
         inventory_management = QPushButton('Inventory')
         customer_management = QPushButton('Customer')
+        promo_management = QPushButton('Promo')
         user_management = QPushButton('User')
         settings = QPushButton('Settings')
         spacer = QFrame()
 
-        item_management.clicked.connect(lambda: self.change_content_tab(1))
-        inventory_management.clicked.connect(lambda: self.change_content_tab(2))
+        item_management.clicked.connect(lambda: self.change_content_tab(0))
+        inventory_management.clicked.connect(lambda: self.change_content_tab(1))
+        promo_management.clicked.connect(lambda: self.change_content_tab(2))
         customer_management.clicked.connect(lambda: self.change_content_tab(3))
         user_management.clicked.connect(lambda: self.change_content_tab(4))
         settings.clicked.connect(lambda: self.change_content_tab(5))
 
         self.navbar_layout.addWidget(item_management)
         self.navbar_layout.addWidget(inventory_management)
+        self.navbar_layout.addWidget(promo_management)
         self.navbar_layout.addWidget(customer_management)
         self.navbar_layout.addWidget(user_management)
         self.navbar_layout.addWidget(settings)

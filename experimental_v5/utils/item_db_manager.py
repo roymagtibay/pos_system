@@ -2,107 +2,8 @@ import os
 import sqlite3 # pre-installed in python (if not, install it using 'pip install pysqlite')
 import os 
 
-class InitDatabaseTable():
-    def __init__(self, db_file='SALES.db'):
-        super().__init__()
-        # Creates folder for the db file
-        self.db_folder_path = 'database/sales/'  # Adjust the path
-        self.db_file_path = os.path.join(self.db_folder_path, db_file)
-        os.makedirs(self.db_folder_path, exist_ok=True)
-
-        # Connects to SQL database named 'SALES.db'
-        self.conn = sqlite3.connect(database=self.db_file_path)
-        self.cursor = self.conn.cursor()
-
-    def database_table(self):
-        # ItemType
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ItemType (
-            ItemTypeId INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT,
-            PromoId INTEGER DEFAULT 0,
-            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-            
-            FOREIGN KEY (PromoId) REFERENCES Promo(PromoId)  -- Additional Promos
-        );
-        ''')
-        self.conn.commit()
-
-        # Brand
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Brand (
-            BrandId INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT,
-            PromoId INTEGER DEFAULT 0,
-            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-            
-            FOREIGN KEY (PromoId) REFERENCES Promo(PromoId)  -- Additional Promos
-        );
-        ''')
-        self.conn.commit()
-
-        # SalesGroup
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS SalesGroup (
-            SalesGroupId INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT,
-            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        ''')
-        self.conn.commit()
-
-        # Supplier
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Supplier (
-            SupplierId INTEGER PRIMARY KEY AUTOINCREMENT,
-            Name TEXT,
-            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        ''')
-        self.conn.commit()
-
-        # Item
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS Item (
-            ItemId INTEGER PRIMARY KEY AUTOINCREMENT,
-            ItemName TEXT,
-            Barcode TEXT,
-            ItemTypeId INTEGER DEFAULT 0,
-            BrandId INTEGER DEFAULT 0,
-            SalesGroupId INTEGER DEFAULT 0,
-            SupplierId INTEGER DEFAULT 0,
-            ExpireDt DATETIME,
-            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-            
-            FOREIGN KEY (ItemTypeId) REFERENCES ItemType(ItemTypeId),
-            FOREIGN KEY (BrandId) REFERENCES Brand(BrandId),
-            FOREIGN KEY (SalesGroupId) REFERENCES SalesGroup(SalesGroupId),
-            FOREIGN KEY (SupplierId) REFERENCES Supplier(SupplierId)
-        );
-        ''')
-        self.conn.commit()
-
-        # ItemPrice
-        self.cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ItemPrice (
-            ItemPriceId INTEGER PRIMARY KEY AUTOINCREMENT,
-            ItemId INTEGER DEFAULT 0,
-            EffectiveDt DATETIME,
-            PromoId INTEGER DEFAULT 0,
-            Cost DECIMAL(15, 2),
-            Discount DECIMAL(15, 2),
-            SellPrice DECIMAL(15, 2),
-            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-            
-            FOREIGN KEY (ItemId) REFERENCES Item(ItemId),
-            FOREIGN KEY (PromoId) REFERENCES Promo(PromoId)
-        );
-        ''')
-        self.conn.commit()
-
-
-# queries for adding item/s
-class StoreData():
+# for storing item data
+class StoreItemData():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # Creates folder for the db file
@@ -180,7 +81,8 @@ class StoreData():
               item_id, cost, discount, sell_price, effective_dt))
         self.conn.commit()
 
-class RetrieveId():
+# for retrieving ids
+class RetrieveItemId():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # Creates folder for the db file
@@ -313,7 +215,8 @@ class RetrieveId():
         # ''')
         # self.conn.commit()
 
-class ChangeData():
+# for editing items
+class ChangeItemData():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # Creates folder for the db file
@@ -336,8 +239,8 @@ class ChangeData():
 
         self.conn.commit()
 
-# queries for listing item/s
-class RetrieveData():
+# for listing data
+class RetrieveItemData():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
         # Creates folder for the db file
@@ -385,4 +288,3 @@ class RetrieveData():
         all_data = self.cursor.fetchall()
 
         return all_data
-    

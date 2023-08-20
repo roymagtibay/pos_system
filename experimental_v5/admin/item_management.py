@@ -7,7 +7,7 @@ from PyQt6 import *
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.db_manager import *
+from utils.item_db_manager import *
 
 class EditItemWindow(QDialog):
     data_saved = pyqtSignal()
@@ -15,7 +15,7 @@ class EditItemWindow(QDialog):
     def __init__(self, row_index, row_value):
         super().__init__()
 
-        self.change_query = ChangeData()
+        self.change_query = ChangeItemData()
 
         self.create_layout(row_index, row_value)
 
@@ -127,8 +127,8 @@ class AddItemWindow(QDialog):
 
         self.setWindowTitle('Add Item')
 
-        self.store_query = StoreData()
-        self.retrieve_data_id = RetrieveId()
+        self.store_query = StoreItemData()
+        self.retrieve_data_id = RetrieveItemId()
 
         self.create_layout()
 
@@ -265,7 +265,7 @@ class ListItemTable(QTableWidget):
     def __init__(self):
         super().__init__()
 
-        self.retrieve_query = RetrieveData()
+        self.retrieve_query = RetrieveItemData()
         self.create_layout()
 
     def open_edit_item_window(self, row_index, row_value):
