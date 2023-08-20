@@ -1,15 +1,16 @@
+import os
 import sqlite3 # pre-installed in python (if not, install it using 'pip install pysqlite')
 import os 
 
 class InitDatabaseTable():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
-        # creates folder for the db file
-        self.db_folder_path = 'sales/'
+        # Creates folder for the db file
+        self.db_folder_path = 'database/sales/'  # Adjust the path
         self.db_file_path = os.path.join(self.db_folder_path, db_file)
         os.makedirs(self.db_folder_path, exist_ok=True)
 
-        # connects to SQL database named 'SALES.db'
+        # Connects to SQL database named 'SALES.db'
         self.conn = sqlite3.connect(database=self.db_file_path)
         self.cursor = self.conn.cursor()
 
@@ -103,12 +104,12 @@ class InitDatabaseTable():
 class StoreData():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
-        # creates folder for the db file
-        self.db_folder_path = 'sales/'
+        # Creates folder for the db file
+        self.db_folder_path = 'database/sales/'  # Adjust the path
         self.db_file_path = os.path.join(self.db_folder_path, db_file)
         os.makedirs(self.db_folder_path, exist_ok=True)
 
-        # connects to SQL database named 'SALES.db'
+        # Connects to SQL database named 'SALES.db'
         self.conn = sqlite3.connect(database=self.db_file_path)
         self.cursor = self.conn.cursor()
 
@@ -125,7 +126,7 @@ class StoreData():
         SELECT ? WHERE NOT EXISTS (SELECT 1 FROM Brand WHERE Name = ?)
         ''', (brand, brand))
         self.conn.commit()
-
+    
     def sales_group_data(self, sales_group):
         self.cursor.execute('''
         INSERT INTO SalesGroup (Name)
@@ -181,12 +182,12 @@ class StoreData():
 class RetrieveId():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
-        # creates folder for the db file
-        self.db_folder_path = 'sales/'
+        # Creates folder for the db file
+        self.db_folder_path = 'database/sales/'  # Adjust the path
         self.db_file_path = os.path.join(self.db_folder_path, db_file)
         os.makedirs(self.db_folder_path, exist_ok=True)
 
-        # connects to SQL database named 'SALES.db'
+        # Connects to SQL database named 'SALES.db'
         self.conn = sqlite3.connect(database=self.db_file_path)
         self.cursor = self.conn.cursor()
 
@@ -311,16 +312,63 @@ class RetrieveId():
         # ''')
         # self.conn.commit()
 
+class ChangeData():
+    def __init__(self, db_file='SALES.db'):
+        super().__init__()
+        # Creates folder for the db file
+        self.db_folder_path = 'database/sales/'  # Adjust the path
+        self.db_file_path = os.path.join(self.db_folder_path, db_file)
+        os.makedirs(self.db_folder_path, exist_ok=True)
+
+        # Connects to SQL database named 'SALES.db'
+        self.conn = sqlite3.connect(database=self.db_file_path)
+        self.cursor = self.conn.cursor()
+
+    def all_item_data(self, item_name, barcode, expire_dt, item_type, brand, sales_group, supplier, item_id, item_type_id, brand_id, sales_group_id, supplier_id):
+        self.cursor.execute('''
+        UPDATE Item
+        SET ItemName = ?,
+            Barcode = ?,
+            ExpireDt = ?
+        WHERE ItemId = ? AND ItemTypeId = ? AND BrandId = ? AND SalesGroupId = ? AND SupplierId = ?;
+        ''', (item_name, barcode, expire_dt, item_id, item_type_id, brand_id, sales_group_id, supplier_id))
+        
+        self.cursor.execute('''
+        UPDATE ItemType
+        SET Name = ?
+        WHERE ItemTypeId = (SELECT ItemTypeId FROM Item WHERE ItemId = ?)
+        ''', (item_type, item_id))
+        
+        self.cursor.execute('''
+        UPDATE Brand
+        SET Name = ?
+        WHERE BrandId = (SELECT BrandId FROM Item WHERE ItemId = ?)
+        ''', (brand, item_id))
+        
+        self.cursor.execute('''
+        UPDATE SalesGroup
+        SET Name = ?
+        WHERE SalesGroupId = (SELECT SalesGroupId FROM Item WHERE ItemId = ?)
+        ''', (sales_group, item_id))
+        
+        self.cursor.execute('''
+        UPDATE Supplier
+        SET Name = ?
+        WHERE SupplierId = (SELECT SupplierId FROM Item WHERE ItemId = ?)
+        ''', (supplier, item_id))
+
+        self.conn.commit()
+
 # queries for listing item/s
 class RetrieveData():
     def __init__(self, db_file='SALES.db'):
         super().__init__()
-        # creates folder for the db file
-        self.db_folder_path = 'sales/'
+        # Creates folder for the db file
+        self.db_folder_path = 'database/sales/'  # Adjust the path
         self.db_file_path = os.path.join(self.db_folder_path, db_file)
         os.makedirs(self.db_folder_path, exist_ok=True)
 
-        # connects to SQL database named 'SALES.db'
+        # Connects to SQL database named 'SALES.db'
         self.conn = sqlite3.connect(database=self.db_file_path)
         self.cursor = self.conn.cursor()
 
@@ -337,7 +385,12 @@ class RetrieveData():
             COALESCE(ItemPrice.Cost, 0.00) AS Cost, 
             COALESCE(ItemPrice.Discount, 0.00) AS Discount, 
             COALESCE(ItemPrice.SellPrice, 0.00) AS SellPrice,
-            COALESCE(ItemPrice.EffectiveDt, 'unk') AS EffectiveDt
+            COALESCE(ItemPrice.EffectiveDt, 'unk') AS EffectiveDt,
+            Item.ItemId,
+            ItemType.ItemTypeId,
+            Brand.BrandId,
+            SalesGroup.SalesGroupId,
+            Supplier.SupplierId
                             
         FROM ItemPrice
             LEFT JOIN Item
@@ -355,3 +408,5 @@ class RetrieveData():
         all_data = self.cursor.fetchall()
 
         return all_data
+    
+
