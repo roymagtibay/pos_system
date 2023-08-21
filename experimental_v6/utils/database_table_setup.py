@@ -100,6 +100,21 @@ class CreateDatabaseTable():
         ''')
         self.conn.commit()
 
+        # Stock
+        self.cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Stock (
+            StockId INTEGER PRIMARY KEY AUTOINCREMENT,
+            SupplierId INTEGER DEFAULT 0,
+            ItemId INTEGER DEFAULT 0,
+            OnHand INTEGER,
+            Available INTEGER,
+            UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (SupplierId) REFERENCES Supplier(SupplierId),
+            FOREIGN KEY (ItemId) REFERENCES Item(ItemId)
+        );
+        ''')
+        self.conn.commit()
+
         # Customer
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS Customer (

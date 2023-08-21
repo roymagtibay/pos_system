@@ -9,13 +9,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.database_table_setup import *
 from utils.item_management_sql import *
+from utils.inventory_management_sql import *
 
 class ItemManagementWidget(QWidget):
     def __init__(self):
         super().__init__()
 
         self.init_layout()
+        self.call_sql_utils()
 
+        self.create_table.database_table()
+
+    def call_sql_utils(self):
+        self.create_table = CreateDatabaseTable()
+        
     # call 'AddItemDialog(QDialog)'
     def open_add_item_window(self):
         add_item_dialog = AddItemDialog()
@@ -60,30 +67,40 @@ class AddItemDialog(QDialog):
     
     # call sql queries 
     def call_sql_utils(self):
-        self.create_table = CreateDatabaseTable()
-        self.insert_data = InsertItemData()
-        self.select_id = SelectItemId()
-        self.select_data = SelectItemData()
+        self.insert_item_data = InsertItemData()
+        self.select_item_id = SelectItemId()
+        self.select_item_data = SelectItemData()
+        self.insert_inventory_data = InsertStockData()
+
+    def track_inventory_field(self, flag):
+        if flag == 'Yes':
+            self.on_hand_stock.setDisabled(False)
+            self.available_stock.setDisabled(False)
+
+        elif flag == 'No':
+            self.on_hand_stock.setDisabled(True)
+            self.available_stock.setDisabled(True)
+
 
     # fills the 'QComboBoxes' with registered data in SALES.db
     def fill_combobox(self):
-        items = self.select_data.items()
+        items = self.select_item_data.combobox_items()
         for row in items:
             self.item_name.addItem(row)
 
-        item_types = self.select_data.item_types()
+        item_types = self.select_item_data.combobox_item_types()
         for row in item_types:
             self.item_type.addItem(row)
 
-        brands = self.select_data.brands()
+        brands = self.select_item_data.combobox_brands()
         for row in brands:
             self.brand.addItem(row)
 
-        sales_groups = self.select_data.sales_groups()
+        sales_groups = self.select_item_data.combobox_sales_groups()
         for row in sales_groups:
             self.sales_group.addItem(row)
 
-        suppliers = self.select_data.suppliers()
+        suppliers = self.select_item_data.combobox_suppliers()
         for row in suppliers:
             self.supplier.addItem(row)
 
@@ -91,53 +108,95 @@ class AddItemDialog(QDialog):
     def init_layout(self):
         self.layout = QGridLayout()
 
+        self.numeric_input_validator = QDoubleValidator()
+        self.numeric_input_validator.setDecimals(2)  # Set the number of decimal places
+        self.numeric_input_validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        self.numeric_input_validator.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)) 
 
+        # declare variable for widgets
         self.item_name = QComboBox()
         self.item_name.setEditable(True)
+
         self.barcode = QLineEdit()
         self.barcode.setPlaceholderText('Barcode')
+
         self.expire_dt = QDateEdit()
         self.expire_dt.setDate(QDate.currentDate())
+        self.expire_dt.setMinimumDate(QDate.currentDate())
+        self.expire_dt.setCalendarPopup(True)
+
         self.item_type = QComboBox()
         self.item_type.setEditable(True)
+
         self.brand = QComboBox()
         self.brand.setEditable(True)
+
         self.sales_group = QComboBox()
         self.sales_group.addItem('Retail')
         self.sales_group.addItem('Wholesale')
+
         self.supplier = QComboBox()
         self.supplier.setEditable(True)
+
         self.cost = QLineEdit()
+        self.cost.setValidator(self.numeric_input_validator)
+        self.cost.setText(str(0.00))
         self.cost.setPlaceholderText('Cost')
+
         self.discount = QLineEdit()
+        self.discount.setValidator(self.numeric_input_validator)
+        self.discount.setText(str(0.00))
         self.discount.setPlaceholderText('Discount')
+
         self.sell_price = QLineEdit()
+        self.sell_price.setValidator(self.numeric_input_validator)
+        self.sell_price.setText(str(0.00))
         self.sell_price.setPlaceholderText('Sell price')
+
         self.effective_dt = QDateEdit()
         self.effective_dt.setDate(QDate.currentDate())
+        self.effective_dt.setMinimumDate(QDate.currentDate())
+        self.effective_dt.setCalendarPopup(True)
+        
         self.track_inventory_label = QLabel('Track inventory for this item?')
         self.track_inventory_y = QRadioButton('Yes')
+        self.track_inventory_y.clicked.connect(lambda: self.track_inventory_field('Yes'))
         self.track_inventory_n = QRadioButton('No')
+        self.track_inventory_n.setChecked(True)
+        self.track_inventory_n.clicked.connect(lambda: self.track_inventory_field('No'))        
+
         self.on_hand_stock = QLineEdit()
+        self.on_hand_stock.setValidator(self.numeric_input_validator)
+        self.on_hand_stock.setText(str(0))
         self.on_hand_stock.setPlaceholderText('On hand stock')
+
         self.available_stock = QLineEdit()
+        self.available_stock.setValidator(self.numeric_input_validator)
+        self.available_stock.setText(str(0))
         self.available_stock.setPlaceholderText('Available stock')
+
         self.save_button = QPushButton('SAVE')
 
-        self.item_name.setCurrentText('Item 1')
-        self.barcode.setText('e4isor')
-        self.expire_dt.setDate(QDate.currentDate())
-        self.item_type.setCurrentText('Type 1')
-        self.brand.setCurrentText('Brand 1')
-        self.supplier.setCurrentText('Supplier 1')
-        self.cost.setText(str(30.40))
-        self.discount.setText(str(10.60))
-        self.sell_price.setText(str(50.75))
-        self.effective_dt.setDate(QDate.currentDate())
-
         self.fill_combobox()
-        self.save_button.clicked.connect(lambda: self.step_a(self.item_type, self.brand, self.sales_group, self.supplier, self.item_name, self.barcode, self.expire_dt, self.cost, self.discount, self.sell_price, self.effective_dt))
 
+        # UNCOMMENT IF WILL BE USED FOR TESTING
+        # self.item_name.setCurrentText('Item 1')
+        # self.barcode.setText('e4isor')
+        # self.expire_dt.setDate(QDate.currentDate())
+        # self.item_type.setCurrentText('Type 1')
+        # self.brand.setCurrentText('Brand 1')
+        # self.supplier.setCurrentText('Supplier 1')
+        # self.cost.setText(str(30.40))
+        # self.discount.setText(str(10.60))
+        # self.sell_price.setText(str(50.75))
+        # self.effective_dt.setDate(QDate.currentDate())
+
+        self.track_inventory_field('No')
+        # self.fill_combobox() # calls fill_combobox function
+
+        self.save_button.clicked.connect(lambda: self.step_a(self.item_type, self.brand, self.sales_group, self.supplier, self.item_name, self.barcode, self.expire_dt, self.cost, self.discount, self.sell_price, self.effective_dt, self.on_hand_stock, self.available_stock))
+
+        # add the widgets to the layout
         self.layout.addWidget(self.item_name)
         self.layout.addWidget(self.barcode)
         self.layout.addWidget(self.expire_dt)
@@ -160,8 +219,7 @@ class AddItemDialog(QDialog):
 
     # functions labeled as steps for adding items
     # init data base table and convert raw values
-    def step_a(self, raw_item_type, raw_brand, raw_sales_group, raw_supplier, raw_item_name, raw_barcode, raw_expire_dt, raw_cost, raw_discount, raw_sell_price, raw_effective_dt): 
-        self.create_table.database_table()
+    def step_a(self, raw_item_type, raw_brand, raw_sales_group, raw_supplier, raw_item_name, raw_barcode, raw_expire_dt, raw_cost, raw_discount, raw_sell_price, raw_effective_dt, raw_on_hand_stock, raw_available_stock): 
         
         # ItemType, Brand, SalesGroup, and Supplier table
         converted_item_type = str(raw_item_type.currentText())
@@ -179,41 +237,55 @@ class AddItemDialog(QDialog):
         converted_discount = '{:.2f}'.format(float(raw_discount.text()))
         converted_sell_price = '{:.2f}'.format(float(raw_sell_price.text()))
         converted_effective_dt = raw_effective_dt.date().toString(Qt.DateFormat.ISODate)
+
+        converted_on_hand_stock = int(raw_on_hand_stock.text())
+        converted_available_stock = int(raw_available_stock.text())
+
+        # Perform input validation here
+        if (converted_item_type == '' or converted_brand == '' or converted_sales_group == '' or converted_supplier == '' or converted_item_name == '' or converted_barcode == '' or converted_cost == 0.00 or converted_discount == 0.00 or converted_sell_price == 0.00):
+            QMessageBox.critical(self, "Error", "All fields must be filled.")
+
+        else:
+            # If all fields are filled, proceed with saving logic
+            self.step_b(converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt, converted_on_hand_stock, converted_available_stock)
         
         print('add_item: step_a -- done')
 
         # pass values to step_b parameters
-        self.step_b(converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt)
         
     # store item_type, brand, sales_group, and supplier data
-    def step_b(self, converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt): 
-        self.insert_data.item_type_data(converted_item_type)
-        self.insert_data.brand_data(converted_brand)
-        self.insert_data.sales_group_data(converted_sales_group)
-        self.insert_data.supplier_data(converted_supplier)
+    def step_b(self, converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt, converted_on_hand_stock, converted_available_stock): 
+        self.insert_item_data.item_type_data(converted_item_type)
+        self.insert_item_data.brand_data(converted_brand)
+        self.insert_item_data.sales_group_data(converted_sales_group)
+        self.insert_item_data.supplier_data(converted_supplier)
 
         print('add_item: step_b -- done')
 
-        self.step_c(converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt)
+        self.step_c(converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt, converted_on_hand_stock, converted_available_stock)
 
     # retrieve item_type, brand, sales_group, and supplier ids and store item data (item_name, barcode, expire_dt)
-    def step_c(self, converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt): 
-        converted_item_type_id = int(self.select_id.item_type_id(converted_item_type))
-        converted_brand_id = int(self.select_id.brand_id(converted_brand))
-        converted_sales_group_id = int(self.select_id.sales_group_id(converted_sales_group))
-        converted_supplier_id = int(self.select_id.supplier_id(converted_supplier))
+    def step_c(self, converted_item_type, converted_brand, converted_sales_group, converted_supplier, converted_item_name, converted_barcode, converted_expire_dt, converted_cost, converted_discount, converted_sell_price, converted_effective_dt, converted_on_hand_stock, converted_available_stock): 
+        converted_item_type_id = int(self.select_item_id.item_type_id(converted_item_type))
+        converted_brand_id = int(self.select_item_id.brand_id(converted_brand))
+        converted_sales_group_id = int(self.select_item_id.sales_group_id(converted_sales_group))
+        converted_supplier_id = int(self.select_item_id.supplier_id(converted_supplier))
 
-        self.insert_data.item_data(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id)
+        self.insert_item_data.item_data(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id)
 
         print('add_item: step_c -- done')
 
-        self.step_d(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id, converted_cost, converted_discount, converted_sell_price, converted_effective_dt)
+        self.step_d(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id, converted_cost, converted_discount, converted_sell_price, converted_effective_dt, converted_on_hand_stock, converted_available_stock)
 
     # store item (item_name, barcode, expire_dt, item_type_id, brand_id, sales_group_id, and supplier_id) and item_price data (item_id, cost, discount, sell_price, and effective_dt)
-    def step_d(self, converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id, converted_cost, converted_discount, converted_sell_price, converted_effective_dt): 
-        converted_item_id = int(self.select_id.item_id(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id))
+    def step_d(self, converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id, converted_cost, converted_discount, converted_sell_price, converted_effective_dt, converted_on_hand_stock, converted_available_stock): 
 
-        self.insert_data.item_price_data(converted_item_id, converted_cost, converted_discount, converted_sell_price, converted_effective_dt)
+        converted_item_id = int(self.select_item_id.item_id(converted_item_name, converted_barcode, converted_expire_dt, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id))
+        
+        self.insert_item_data.item_price_data(converted_item_id, converted_cost, converted_discount, converted_sell_price, converted_effective_dt)
+
+        if self.track_inventory_y.isChecked():
+                self.insert_inventory_data.stock_data(converted_supplier_id, converted_item_id, converted_on_hand_stock, converted_available_stock)
 
         print('add_item: step_d -- done')
 
@@ -234,7 +306,7 @@ class EditItemDialog(QDialog):
     def call_sql_utils(self):
         self.create_table = CreateDatabaseTable()
         self.update_data = UpdateItemData()
-        self.select_id = SelectItemId()
+        self.select_item_id = SelectItemId()
 
     # main layout of 'EditItemDialog(QDialog)'
     def init_layout(self, row_index, row_value):
@@ -242,35 +314,48 @@ class EditItemDialog(QDialog):
 
         item_name = QComboBox()
         item_name.setEditable(True)
+
         barcode = QLineEdit()
         barcode.setPlaceholderText('Barcode')
+
         expire_dt = QDateEdit()
+        expire_dt.setMinimumDate(QDate.currentDate())
+        expire_dt.setCalendarPopup(True)
         expire_dt.setDate(QDate.currentDate())
+
         item_type = QComboBox()
         item_type.setDisabled(True)
         item_type.setEditable(True)
+
         brand = QComboBox()
         brand.setDisabled(True)
         brand.setEditable(True)
+
         sales_group = QComboBox()
         sales_group.setDisabled(True)
         sales_group.addItem('Retail')
         sales_group.addItem('Wholesale')
+
         supplier = QComboBox()
         supplier.setDisabled(True)
         supplier.setEditable(True)
+
         cost = QLineEdit()
         cost.setDisabled(True)
         cost.setPlaceholderText('Cost')
+
         discount = QLineEdit()
         discount.setDisabled(True)
         discount.setPlaceholderText('Discount')
+
         sell_price = QLineEdit()
         sell_price.setDisabled(True)
         sell_price.setPlaceholderText('Sell price')
+
         effective_dt = QDateEdit()
         effective_dt.setDisabled(True)
         effective_dt.setDate(QDate.currentDate())
+
         save_button = QPushButton('SAVE')
 
         item_name.setCurrentText(row_value[0])
@@ -316,12 +401,16 @@ class EditItemDialog(QDialog):
         converted_sales_group_id = int(row_value[14])
         converted_supplier_id = int(row_value[15])
 
-        # update item table data
-        self.update_data.item_data(converted_item_name, converted_barcode, converted_expire_dt, converted_item_id, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id)
+                # Perform input validation here
+        if (converted_item_name == '' or converted_barcode == ''):
+            QMessageBox.critical(self, "Error", "All fields must be filled.")
+        else:
+            # update item table data
+            self.update_data.item_data(converted_item_name, converted_barcode, converted_expire_dt, converted_item_id, converted_item_type_id, converted_brand_id, converted_sales_group_id, converted_supplier_id)
+
+            self.accept()
 
         self.data_saved.emit()
-
-        self.accept()
 
 class ListItemTable(QTableWidget):
     def __init__(self):
@@ -332,7 +421,7 @@ class ListItemTable(QTableWidget):
 
     # call sql queries 
     def call_sql_utils(self):
-        self.select_data = SelectItemData()
+        self.select_item_data = SelectItemData()
 
     # call 'EditItemDialog(QDialog)'
     def open_edit_item_window(self, row_index, row_value):
@@ -342,7 +431,7 @@ class ListItemTable(QTableWidget):
 
     # displays filtered items
     def filter_item_table(self, filter_text):
-        filtered_item_data = self.select_data.filtered_item_data(filter_text)
+        filtered_item_data = self.select_item_data.filtered_item_data(filter_text)
 
         self.setRowCount(len(filtered_item_data))
         
@@ -358,7 +447,7 @@ class ListItemTable(QTableWidget):
 
     # displays 50 recently added items
     def display_item_table(self, text):
-        all_item_data = self.select_data.all_item_data(text)
+        all_item_data = self.select_item_data.all_item_data(text)
 
         self.setRowCount(50)
         
