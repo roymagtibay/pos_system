@@ -19,14 +19,14 @@ class InventoryManagementWidget(QWidget):
         self.create_table.database_table()
         self.init_layout()
 
-    # # filter stock flag
-    # def filter_stock(self):
-    #     filter_input = self.filter_stock_field.text()
+    # filter stock flag
+    def filter_stock(self):
+        filter_input = self.filter_stock_field.text()
 
-    #     if filter_input == '':
-    #         self.list_stock_table.display_stock_table(filter_input)
-    #     else:
-    #         self.list_stock_table.filter_stock_table(filter_input)
+        if filter_input == '':
+            self.list_stock_table.display_stock_table(filter_input)
+        else:
+            self.list_stock_table.filter_stock_table(filter_input)
 
     def init_layout(self):
         self.layout = QGridLayout()
@@ -36,8 +36,7 @@ class InventoryManagementWidget(QWidget):
 
         self.list_stock_table = ListInventoryTable() # -- class ListInventoryTable(QTableWidget)
 
-        # self.filter_stock_field.textChanged.connect(self.filter_stock) # connects to filter_stock functions every change of text
-        # add_stock_button.clicked.connect(self.open_add_stock_window) # connects to open_add_stock_window every click of button
+        self.filter_stock_field.textChanged.connect(self.filter_stock) # connects to filter_stock functions every change of text
 
         self.layout.addWidget(self.filter_stock_field,0,0)
         self.layout.addWidget(self.list_stock_table,1,0)
@@ -87,8 +86,8 @@ class EditStockDialog(QDialog):
         self.setLayout(self.layout)
 
     def step_a(self, raw_on_hand_stock, raw_available_stock, row_value):
-        raw_supplier_id = str(row_value[0])
-        raw_item_id = str(row_value[1])
+        raw_supplier_id = str(row_value[4])
+        raw_item_id = str(row_value[5])
 
         converted_supplier_id = int(raw_supplier_id)
         converted_item_id = int(raw_item_id)
@@ -102,7 +101,6 @@ class EditStockDialog(QDialog):
         print(converted_item_id)
         print(converted_on_hand_stock)
         print(converted_available_stock)
-        
         
         self.update_stock.stock_data(converted_on_hand_stock, converted_available_stock, converted_supplier_id, converted_item_id)
 
@@ -126,21 +124,21 @@ class ListInventoryTable(QTableWidget):
         edit_stock_dialog.data_saved.connect(lambda: self.display_stock_table(''))
         edit_stock_dialog.exec()
 
-    # # displays filtered stocks
-    # def filter_stock_table(self, filter_text):
-    #     filtered_stock_data = self.select_stock.filtered_stock_data(filter_text)
+    # displays filtered stocks
+    def filter_stock_table(self, filter_text):
+        filtered_stock_data = self.select_stock.filtered_stock_data(filter_text)
 
-    #     self.setRowCount(len(filtered_stock_data))
+        self.setRowCount(len(filtered_stock_data))
         
-    #     for row_index, row_value in enumerate(filtered_stock_data):
-    #         row_cell_limit = row_value[:11] # limits the data shown in the table
+        for row_index, row_value in enumerate(filtered_stock_data):
+            row_cell_limit = row_value[:4] # limits the data shown in the table
 
-    #         for col_index, col_value in enumerate(row_cell_limit):
-    #             self.setItem(row_index, col_index + 1, QTableWidgetItem(str(col_value)))
+            for col_index, col_value in enumerate(row_cell_limit):
+                self.setItem(row_index, col_index + 1, QTableWidgetItem(str(col_value)))
 
-    #         self.edit_tem_button = QPushButton('EDIT')
-    #         # self.edit_tem_button.clicked.connect(lambda row_index=row_index, row_value=row_value: self.open_edit_stock_window(row_index, row_value))
-    #         self.setCellWidget(row_index, 0, self.edit_tem_button)
+            self.edit_tem_button = QPushButton('EDIT')
+            self.edit_tem_button.clicked.connect(lambda row_index=row_index, row_value=row_value: self.open_edit_stock_window(row_index, row_value))
+            self.setCellWidget(row_index, 0, self.edit_tem_button)
 
     # displays 50 recently added stocks
     def display_stock_table(self, text):
@@ -162,7 +160,7 @@ class ListInventoryTable(QTableWidget):
     def init_layout(self):
         
         self.setColumnCount(5)
-        self.setHorizontalHeaderLabels(['','Item name','Supplier','On hand stock','Available stock'])
+        self.setHorizontalHeaderLabels(['','Supplier','Item name','On hand stock','Available stock'])
         
         # sets the value of the parameter of display_stock_table function to ''
         self.display_stock_table('')

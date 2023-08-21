@@ -203,10 +203,12 @@ class SelectStockData():
     def all_stock_data(self, text):
         self.cursor.execute('''
         SELECT
-            COALESCE(Supplier.SupplierId, 'unk') AS SupplierId,
-            COALESCE(Item.ItemId, 'unk') AS ItemId, 
+            COALESCE(Supplier.Name, 'unk') AS Supplier,
+            COALESCE(Item.ItemName, 'unk') AS ItemName, 
             Stock.OnHand,
-            Stock.Available                 
+            Stock.Available,
+            Supplier.SupplierId,
+            Item.ItemId     
         FROM ItemPrice
             LEFT JOIN Item
                 ON ItemPrice.ItemId = Item.ItemId
@@ -226,36 +228,21 @@ class SelectStockData():
     def filtered_stock_data(self, text):
         self.cursor.execute('''
         SELECT
-            COALESCE(Item.ItemName, 'unk'),
-            COALESCE(Item.Barcode, 'unk'),
-            COALESCE(Item.ExpireDt, 'unk'), 
-            COALESCE(ItemType.Name, 'unk') AS ItemType, 
-            COALESCE(Brand.Name, 'unk') AS Brand, 
-            COALESCE(SalesGroup.Name, 'unk') AS SalesGroup, 
-            COALESCE(Supplier.Name, 'unk') AS Supplier, 
-            COALESCE(ItemPrice.Cost, 0.00) AS Cost, 
-            COALESCE(ItemPrice.Discount, 0.00) AS Discount, 
-            COALESCE(ItemPrice.SellPrice, 0.00) AS SellPrice,
-            COALESCE(ItemPrice.EffectiveDt, 'unk') AS EffectiveDt,
-            Item.ItemId,
-            ItemType.ItemTypeId,
-            Brand.BrandId,
-            SalesGroup.SalesGroupId,
-            Supplier.SupplierId
+            COALESCE(Supplier.Name, 'unk') AS Supplier,
+            COALESCE(Item.ItemName, 'unk') AS ItemName, 
+            Stock.OnHand,
+            Stock.Available  
         FROM ItemPrice
-            LEFT JOIN Item ON ItemPrice.ItemId = Item.ItemId
-            LEFT JOIN ItemType ON Item.ItemTypeId = ItemType.ItemTypeId
-            LEFT JOIN Brand ON Item.BrandId = Brand.BrandId
-            LEFT JOIN Supplier ON Item.SupplierId = Supplier.SupplierId
-            LEFT JOIN SalesGroup ON Item.SalesGroupId = SalesGroup.SalesGroupId
+            LEFT JOIN Item
+                ON ItemPrice.ItemId = Item.ItemId
+            LEFT JOIN Supplier
+                ON Item.SupplierId = Supplier.SupplierId
+            LEFT JOIN Stock
+                ON Stock.ItemId = Item.ItemId
         WHERE
-            Item.ItemName LIKE ? OR
-            Item.Barcode LIKE ? OR
-            ItemType.Name LIKE ? OR
-            Brand.Name LIKE ? OR
-            SalesGroup.Name LIKE ? OR
-            Supplier.Name LIKE ?
-        ''', ('%' + text + '%', '%' + text + '%', '%' + text + '%', '%' + text + '%', '%' + text + '%', '%' + text + '%'))
+            (Stock.OnHand IS NOT NULL AND Stock.Available IS NOT NULL) AND
+            (Supplier.Name LIKE ? OR Item.ItemName LIKE ? OR Stock.OnHand LIKE ? OR Stock.Available LIKE ?)
+        ''', ('%' + text + '%', '%' + text + '%', '%' + text + '%', '%' + text + '%'))
 
         stock = self.cursor.fetchall()
 
