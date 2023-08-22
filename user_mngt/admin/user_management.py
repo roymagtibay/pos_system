@@ -112,8 +112,8 @@ class UserListTable(QTableWidget):
 
     def save_user_window(self, row_index, user_name, user_level):
         edit_item_dialog = SaveUserDialog(row_index, user_name, user_level)
-        edit_item_dialog.data_saved.connect(lambda: self.populate_UserList(''))
         edit_item_dialog.exec()
+        self.populate_UserList('All')
 
         self.data_saved.emit()
 
