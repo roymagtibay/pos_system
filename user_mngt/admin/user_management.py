@@ -13,7 +13,7 @@ from utils.user_management_sql import *
 class UserManagementWidget(QWidget):
     def __init__(self):
         super().__init__()
-
+        #self.setFixedSize(400, 400)
         self.setWindowTitle('User Management')
         self.create_table = CreateDatabaseTable()
         self.create_table.database_table()
@@ -25,18 +25,6 @@ class UserManagementWidget(QWidget):
         self.user_crud = UserDataCRUD()
 
     def init_layout(self):
-        layout_header = QVBoxLayout()
-
-        self.Page_Title = QLabel("User Settings", alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.Page_Title.setStyleSheet(''' font-size: 24px; color: "Blue" ''')
-
-        layout_header.addWidget(self.Page_Title)
-        layout_header.setSpacing(0)
-        layout_header.setContentsMargins(0, 0, 0, 0)
-
-        header_widget = QWidget()
-        header_widget.setLayout(layout_header)
-
         self.layout = QGridLayout()
 
         self.Usertypes = QComboBox(self)
@@ -45,15 +33,15 @@ class UserManagementWidget(QWidget):
         self.Usertypes.addItem("All")
         self.Usertypes.addItem("Admin")
         self.Usertypes.addItem("Cashier")
+        self.Usertypes = self.Usertypes
 
         self.add_user_button = QPushButton('ADD')
 
-        #self.layout.addRow(QLabel(""))
-        self.layout.addWidget(self.Usertypes,0,0) 
-        self.layout.addWidget(self.add_user_button,0,1)
+        self.layout.addWidget(self.Usertypes,0,0,1,1) 
+        self.layout.addWidget(self.add_user_button,0,1,1,1)
 
         self.user_list_table = UserListTable(self.Usertypes.currentText())
-        self.layout.addWidget(self.user_list_table,1,0,1,2)
+        self.layout.addWidget(self.user_list_table,1,0,1,1)
 
         self.Usertypes.currentIndexChanged.connect(self.populate_table)  # connects to user_crud functions every change of text
 
@@ -66,7 +54,7 @@ class UserManagementWidget(QWidget):
 
         self.setLayout(self.layout)
 
-        self.setWindowTitle('Item Promo Management')
+        self.setWindowTitle('User Management')
 
     def populate_table(self, data):
         filter_input = self.Usertypes.currentText()
