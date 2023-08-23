@@ -45,7 +45,6 @@ class UserManagementWidget(QWidget):
         self.Usertypes.addItem("All")
         self.Usertypes.addItem("Admin")
         self.Usertypes.addItem("Cashier")
-        Usertypes = self.Usertypes
 
         self.add_user_button = QPushButton('ADD')
 
@@ -114,8 +113,7 @@ class UserListTable(QTableWidget):
         edit_item_dialog = SaveUserDialog(row_index, user_name, user_level)
         edit_item_dialog.exec()
         self.populate_UserList('All')
-
-        self.data_saved.emit()
+        
 
    
 
@@ -176,10 +174,6 @@ class SaveUserDialog(QDialog):
             self.user_crud.update_user(user_name, newPwd, newLvl)
 
         self.close()
-
-        
-
-
 
 if __name__ == ('__main__'):
     pos_app = QApplication(sys.argv)
