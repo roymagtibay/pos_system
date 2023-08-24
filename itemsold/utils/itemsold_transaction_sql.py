@@ -12,8 +12,18 @@ class ItemSoldData():
 		# connects to SQL database named 'TXN.db'
 		self.conn = sqlite3.connect(database=self.db_file_path)
 		self.cursor = self.conn.cursor()
-		
-	def InsertItemSold(self, ItemPriceId, CustomerId, StockId, UserId, Quantity, TotalAmount, ReferenceId):
+
+	def select_data(self):
+		self.cursor.execute('''
+		SELECT s.ItemPriceId, s.CustomerId, s.StockId, s.UserId, s.Quantity, s.TotalAmount, s.Void, s.ReferenceId, r.Reason
+		FROM ItemSold s
+		LEFT JOIN Reason r
+		ON s.ReasonId = r.ReasonId            
+		''')	
+		data = self.cursor.fetchall()
+		return data
+
+	def insert_data(self, ItemPriceId, CustomerId, StockId, UserId, Quantity, TotalAmount, ReferenceId):
 		self.cursor.execute('''
 		INSERT INTO ItemSold (ItemPriceId, CustomerId, StockId, UserId, Quantity, TotalAmount, ReferenceId)
 		SELECT 
@@ -28,6 +38,45 @@ class ItemSoldData():
 		
 		self.conn.commit()
 
+	def void_data(self, ItemPriceId, ReasonId, ReferenceId):
+		self.cursor.execute('''
+		UPDATE ItemSold
+		SET Void = 1,
+		    ResonId = ? 
+		WHERE   ItemPriceId = ?   AND  ReferenceId = ?         
+		''', (ReasonId, ItemPriceId, ReferenceId))	
+		
+		self.conn.commit()
+
+class ReasonData():
+	def __init__(self, db_file='SALES.db'):
+		super().__init__()
+		# creates folder for the db file
+		self.db_folder_path = 'C:/Users/User/Documents/GitHub/pos_system/database/sales'
+		self.db_file_path = os.path.join(self.db_folder_path, db_file)
+		os.makedirs(self.db_folder_path, exist_ok=True)		
+		# connects to SQL database named 'SALES.db'
+		self.conn = sqlite3.connect(database=self.db_file_path)
+		self.cursor = self.conn.cursor()
+
+	def insert_data(self, Reason):
+		self.cursor.execute('''
+		INSERT INTO Reason (Reason)
+		SELECT ?
+		WHERE NOT EXISTS (SELECT 1 FROM Reason WHERE Reason = ?)      
+		''', (Reason, Reason))	
+		
+		self.conn.commit()
+
+	def select_data(self, Reason):
+		self.cursor.execute('''
+		SELECT ReasonId
+		FROM Reason 
+		WHERE Reason = ?      
+		''', (Reason))
+		data = self.cursor.fetchone()
+		return data
+
 class CustomerData():
 	def __init__(self, db_file='SALES.db'):
 		super().__init__()
@@ -39,7 +88,7 @@ class CustomerData():
 		self.conn = sqlite3.connect(database=self.db_file_path)
 		self.cursor = self.conn.cursor()
 
-	def UpdateCustomer(self, ReferenceId, CustomerId, TotalAmount)
+	def update_points(self, ReferenceId, CustomerId, TotalAmount)
 		self.cursor.execute('''
 		UPDATE Customer
 		SET Points = Points + (

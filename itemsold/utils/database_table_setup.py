@@ -23,6 +23,7 @@ class CreateDatabaseTable():
 			CustomerId INTEGER DEFAULT 0,
 			StockId INTEGER DEFAULT 0,
 			UserId INTEGER DEFAULT 0,
+            ReasonId INTEGER DEFAULT 0,
 			Quantity INTEGER,
 			TotalAmount DECIMAL(15, 2),
 			Void BIT DEFAULT 0,
@@ -31,6 +32,15 @@ class CreateDatabaseTable():
 			FOREIGN KEY (ItemPriceId) REFERENCES ItemPrice(ItemPriceId),
 			FOREIGN KEY (CustomerId) REFERENCES Customer(CustomerId),
 			FOREIGN KEY (StockId) REFERENCES Stocks(StockId)
+		);
+        ''')
+        self.conn.commit()
+        
+        self.cursor.execute('''
+		CREATE TABLE IF NOT EXISTS Reason (
+			ReasonId INTEGER PRIMARY KEY AUTOINCREMENT,
+			Reason TEXT COLLATE NOCASE,
+			UpdateTs DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
         ''')
         self.conn.commit()
